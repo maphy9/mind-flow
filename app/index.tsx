@@ -1,21 +1,16 @@
-import { View, Text } from "react-native";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import React from "react";
+import { useTheme } from "../hooks/useTheme";
 
 const Home = () => {
-  return (
-    <View style={styles.container}>
-      <Text>Home</Text>
-    </View>
-  );
+  const theme = useTheme();
+  const styles = StyleSheet.create({
+    text: {
+      color: theme.secondary,
+    },
+  });
+
+  return <Text style={styles.text}>Home</Text>;
 };
 
 export default Home;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
