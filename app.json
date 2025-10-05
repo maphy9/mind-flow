@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "mind-flow",
     "name": "mind-flow",
     "slug": "mind-flow",
     "version": "1.0.0",
@@ -24,6 +25,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": ["expo-router"]
   }
 }
