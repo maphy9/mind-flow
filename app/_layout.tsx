@@ -1,22 +1,19 @@
-import { View } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import React from "react";
-import { useTheme } from "../hooks/useTheme";
-import { StyleSheet } from "react-native";
 import { Slot } from "expo-router";
+import { useTheme } from "@/hooks/useTheme";
 
 const _layout = () => {
   const theme = useTheme();
   const styles = StyleSheet.create({
-    container: {
+    layout: {
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
       backgroundColor: theme.primary,
     },
   });
 
   return (
-    <View style={styles.container}>
+    <View style={styles.layout}>
       <Slot />
     </View>
   );
