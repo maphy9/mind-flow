@@ -3,6 +3,7 @@ import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 import Text from "../general/Text";
 import logo from "@/assets/images/logo-dark.png";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Header = () => {
   const theme = useTheme();
@@ -11,7 +12,7 @@ const Header = () => {
       backgroundColor: theme.surface,
       borderBottomLeftRadius: 50,
       borderBottomRightRadius: 50,
-      paddingTop: 32,
+      paddingTop: 16,
       paddingBottom: 16,
       justifyContent: "center",
       alignItems: "center",
@@ -32,7 +33,7 @@ const Header = () => {
   });
 
   return (
-    <View style={styles.topBox}>
+    <SafeAreaView style={styles.topBox}>
       <View style={styles.logoContainer}>
         <Image source={logo} style={styles.logo} />
       </View>
@@ -46,7 +47,7 @@ const Header = () => {
       <Text style={{ fontSize: 24, color: theme.secondary, opacity: 0.85 }}>
         Your path to a balanced life
       </Text>
-    </View>
+    </SafeAreaView>
   );
 };
 
