@@ -23,9 +23,11 @@ const EmailLoginMethod = () => {
       shadowRadius: 6,
       elevation: 2,
       marginBottom: 10,
+      color: theme.secondary,
+      backgroundColor: theme.surfaceAccent,
     },
     buttonText: {
-      color: theme.primary,
+      color: theme.secondary,
       fontWeight: "bold",
       textAlign: "center",
       fontSize: 24,
@@ -38,20 +40,10 @@ const EmailLoginMethod = () => {
 
   return (
     <View style={styles.loginMethodsContainer}>
-      <TextInput
-        style={[
-          styles.input,
-          { color: theme.secondary, backgroundColor: theme.surfaceAccent },
-        ]}
-        placeholder="Email"
-        inputMode="email"
-      />
+      <TextInput style={styles.input} placeholder="Email" inputMode="email" />
 
       <TextInput
-        style={[
-          styles.input,
-          { color: theme.secondary, backgroundColor: theme.surfaceAccent },
-        ]}
+        style={styles.input}
         placeholder="Password"
         secureTextEntry={true}
       />

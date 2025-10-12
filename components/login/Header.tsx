@@ -1,19 +1,19 @@
 import { useTheme } from "@/hooks/useTheme";
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, ImageBackground, StyleSheet, View } from "react-native";
 import Text from "../general/Text";
 import logo from "@/assets/images/logo-dark.png";
+import logoBoxDark from "@/assets/images/logo-box-dark.png";
+import logoBoxLight from "@/assets/images/logo-box-light.png";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors } from "@/constants/colors";
 
 const Header = () => {
   const theme = useTheme();
   const styles = StyleSheet.create({
-    topBox: {
-      backgroundColor: theme.surface,
-      borderBottomLeftRadius: 50,
-      borderBottomRightRadius: 50,
-      paddingTop: 16,
-      paddingBottom: 16,
+    logoBox: {
+      paddingTop: 8,
+      paddingBottom: 48,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -33,21 +33,26 @@ const Header = () => {
   });
 
   return (
-    <SafeAreaView style={styles.topBox}>
-      <View style={styles.logoContainer}>
-        <Image source={logo} style={styles.logo} />
-      </View>
+    <ImageBackground
+      source={theme === Colors.dark ? logoBoxDark : logoBoxLight}
+      resizeMode="stretch"
+    >
+      <SafeAreaView style={styles.logoBox}>
+        <View style={styles.logoContainer}>
+          <Image source={logo} style={styles.logo} />
+        </View>
 
-      <Text
-        style={{ fontSize: 32, fontWeight: "bold", color: theme.secondary }}
-      >
-        MindFlow
-      </Text>
+        <Text
+          style={{ fontSize: 32, fontWeight: "bold", color: theme.secondary }}
+        >
+          MindFlow
+        </Text>
 
-      <Text style={{ fontSize: 24, color: theme.secondary, opacity: 0.85 }}>
-        Your path to a balanced life
-      </Text>
-    </SafeAreaView>
+        <Text style={{ fontSize: 24, color: theme.secondary, opacity: 0.85 }}>
+          Your path to a balanced life
+        </Text>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 

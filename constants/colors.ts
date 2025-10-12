@@ -4,8 +4,8 @@ export const Colors = {
     primaryAccent: "#232C26",
     secondary: "#F5F5F4",
     secondaryAccent: "#B7B0AA",
-    surface: "#2B5743",
-    surfaceAccent: "#4F876D",
+    surface: "#4F876D",
+    surfaceAccent: "#2B5743",
     red: "#954247",
   },
   light: {
