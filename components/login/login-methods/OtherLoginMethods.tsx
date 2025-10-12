@@ -4,8 +4,10 @@ import googleLogo from "@/assets/images/google-logo.png";
 import facebookLogo from "@/assets/images/facebook-logo.png";
 import twitterLogo from "@/assets/images/twitter-logo.png";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/context/authContext";
 
 const OtherLoginMethods = () => {
+  const { loginWithGoogle } = useAuth();
   const theme = useTheme();
   const styles = StyleSheet.create({
     loginMethodsContainer: {
@@ -70,7 +72,11 @@ const OtherLoginMethods = () => {
       </View>
 
       <View style={styles.loginMethodIcons}>
-        <TouchableOpacity activeOpacity={0.8} style={[styles.iconButton]}>
+        <TouchableOpacity
+          onPress={loginWithGoogle}
+          activeOpacity={0.8}
+          style={[styles.iconButton]}
+        >
           <Image source={googleLogo} style={styles.loginMethodIcon} />
         </TouchableOpacity>
 

@@ -7,8 +7,10 @@ import logoBoxDark from "@/assets/images/logo-box-dark.png";
 import logoBoxLight from "@/assets/images/logo-box-light.png";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
+import { useAuth } from "@/context/authContext";
 
 const Header = () => {
+  const { currentUser } = useAuth();
   const theme = useTheme();
   const styles = StyleSheet.create({
     logoBox: {
@@ -51,6 +53,8 @@ const Header = () => {
         <Text style={{ fontSize: 24, color: theme.secondary, opacity: 0.85 }}>
           Your path to a balanced life
         </Text>
+
+        <Text>{currentUser ? currentUser.displayName : "Not logged in"}</Text>
       </SafeAreaView>
     </ImageBackground>
   );
