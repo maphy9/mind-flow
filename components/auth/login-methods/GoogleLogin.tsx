@@ -1,12 +1,10 @@
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import React from "react";
 import googleLogo from "@/assets/images/google-logo.png";
-import facebookLogo from "@/assets/images/facebook-logo.png";
-import twitterLogo from "@/assets/images/twitter-logo.png";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/authContext";
 
-const OtherLoginMethods = () => {
+const GoogleLogin = () => {
   const { loginWithGoogle } = useAuth();
   const theme = useTheme();
   const styles = StyleSheet.create({
@@ -23,13 +21,6 @@ const OtherLoginMethods = () => {
       flex: 1,
       justifyContent: "space-between",
     },
-    loginMethodIcons: {
-      flexDirection: "row",
-      justifyContent: "center",
-      gap: 50,
-      alignItems: "center",
-      marginBottom: 60,
-    },
     loginMethodIcon: {
       width: 48,
       height: 48,
@@ -38,26 +29,38 @@ const OtherLoginMethods = () => {
     loginMethodsContainerHeading: {
       width: "100%",
       flexDirection: "row",
-      marginBottom: 10,
+      marginBottom: 20,
       justifyContent: "center",
       alignItems: "center",
-    },
-    iconButton: {
-      backgroundColor: theme.primary,
-      width: 48,
-      height: 48,
-      borderRadius: 48,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 6,
-      elevation: 2,
     },
     horizontalLine: {
       flex: 1,
       backgroundColor: theme.secondary,
       height: 1,
       marginHorizontal: 10,
+    },
+    input: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      width: "100%",
+      height: 64,
+      borderRadius: 100,
+      paddingHorizontal: 20,
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 6,
+      elevation: 2,
+      color: theme.secondary,
+      backgroundColor: theme.surfaceAccent,
+    },
+    buttonText: {
+      color: theme.secondary,
+      fontWeight: "bold",
+      textAlign: "center",
+      fontSize: 24,
     },
   });
 
@@ -71,25 +74,16 @@ const OtherLoginMethods = () => {
         <View style={styles.horizontalLine} />
       </View>
 
-      <View style={styles.loginMethodIcons}>
-        <TouchableOpacity
-          onPress={loginWithGoogle}
-          activeOpacity={0.8}
-          style={[styles.iconButton]}
-        >
-          <Image source={googleLogo} style={styles.loginMethodIcon} />
-        </TouchableOpacity>
-
-        <TouchableOpacity activeOpacity={0.8} style={[styles.iconButton]}>
-          <Image source={facebookLogo} style={styles.loginMethodIcon} />
-        </TouchableOpacity>
-
-        <TouchableOpacity activeOpacity={0.8} style={[styles.iconButton]}>
-          <Image source={twitterLogo} style={styles.loginMethodIcon} />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={[styles.input, { backgroundColor: theme.surface }]}
+        onPress={loginWithGoogle}
+      >
+        <Text style={styles.buttonText}>Login with Google</Text>
+        <Image source={googleLogo} style={styles.loginMethodIcon} />
+      </TouchableOpacity>
     </View>
   );
 };
 
-export default OtherLoginMethods;
+export default GoogleLogin;

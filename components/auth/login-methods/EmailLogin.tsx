@@ -3,7 +3,7 @@ import React from "react";
 import TextInput from "@/components/general/TextInput";
 import { useTheme } from "@/hooks/useTheme";
 
-const EmailLoginMethod = () => {
+const EmailLogin = () => {
   const theme = useTheme();
   const styles = StyleSheet.create({
     loginMethodsContainer: {
@@ -72,4 +72,4 @@ const EmailLoginMethod = () => {
   );
 };
 
-export default EmailLoginMethod;
+export default EmailLogin;

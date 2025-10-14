@@ -1,22 +1,21 @@
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import React from "react";
-import Header from "@/components/login/Header";
-import LoginMethods from "@/components/login/login-methods/LoginMethods";
+import Header from "@/components/auth/Header";
+import LoginMethods from "@/components/auth/login-methods/LoginMethods";
 
 const Login = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      gap: 32,
     },
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Header />
 
       <LoginMethods />
-    </View>
+    </ScrollView>
   );
 };
 
