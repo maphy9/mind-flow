@@ -4,8 +4,13 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithCredential,
+  signInWithEmailAndPassword,
+  signOut as _signOut,
+  createUserWithEmailAndPassword,
 } from "@react-native-firebase/auth";
 import { GoogleSignin } from "react-native-google-signin";
+import { useDispatch } from "react-redux";
+import { showAlert } from "@/redux/states/alerts";
 
 export const AuthContext = createContext(null);
 
@@ -17,17 +22,20 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
   const auth = getAuth();
+  const dispatch = useDispatch();
 
   function login(email, password) {
-    return auth.signInWithEmailAndPassword(email, password);
+    signInWithEmailAndPassword(auth, email, password).catch(() => {
+      dispatch(showAlert({ text: "Invalid credentials", type: "error" }));
+    });
   }
 
   function signOut() {
-    return auth.signOut();
+    return _signOut(auth);
   }
 
   function signUp(email, password) {
-    return auth.createUserWithEmailAndPassword(email, password);
+    return createUserWithEmailAndPassword(auth, email, password);
   }
 
   async function loginWithGoogle() {
@@ -35,6 +43,7 @@ export function AuthProvider({ children }) {
     const signInResult = await GoogleSignin.signIn();
     const idToken = signInResult.idToken;
     if (!idToken) {
+      dispatch(showAlert({ text: "Something went wrong", type: "error" }));
       return;
     }
     const googleCredential = GoogleAuthProvider.credential(idToken);
