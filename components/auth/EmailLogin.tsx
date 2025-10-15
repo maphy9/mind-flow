@@ -1,10 +1,19 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import TextInput from "@/components/general/TextInput";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/context/authContext";
+import { useDispatch } from "react-redux";
+import { showAlert } from "@/redux/states/alerts";
+import { isValidEmail } from "@/utils/email";
+import { useRouter } from "expo-router";
 
-const EmailLoginMethod = () => {
+const EmailLogin = () => {
+  const router = useRouter();
   const theme = useTheme();
+  const { login } = useAuth();
+  const dispatch = useDispatch();
+
   const styles = StyleSheet.create({
     loginMethodsContainer: {
       paddingHorizontal: 20,
@@ -38,12 +47,31 @@ const EmailLoginMethod = () => {
     },
   });
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = () => {
+    if (!isValidEmail(email)) {
+      dispatch(showAlert({ text: "Invalid email", type: "error" }));
+      return;
+    }
+    login(email, password);
+  };
+
   return (
     <View style={styles.loginMethodsContainer}>
-      <TextInput style={styles.input} placeholder="Email" inputMode="email" />
+      <TextInput
+        style={styles.input}
+        onChangeText={(text) => setEmail(text)}
+        value={email}
+        placeholder="Email"
+        inputMode="email"
+      />
 
       <TextInput
         style={styles.input}
+        onChangeText={(text) => setPassword(text)}
+        value={password}
         placeholder="Password"
         secureTextEntry={true}
       />
@@ -51,20 +79,27 @@ const EmailLoginMethod = () => {
       <TouchableOpacity
         activeOpacity={0.8}
         style={[styles.input, { backgroundColor: theme.surface }]}
+        onPress={handleLogin}
       >
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
       <Text style={styles.infoText}>
         Forgot your password?{" "}
-        <Text style={{ color: theme.surface, fontWeight: "bold" }}>
+        <Text
+          style={{ color: theme.surface, fontWeight: "bold" }}
+          onPress={() => router.push("/reset-password")}
+        >
           Reset password
         </Text>
       </Text>
 
       <Text style={styles.infoText}>
         Don’t have an account?{" "}
-        <Text style={{ color: theme.surface, fontWeight: "bold" }}>
+        <Text
+          style={{ color: theme.surface, fontWeight: "bold" }}
+          onPress={() => router.push("/sign-up")}
+        >
           Sign up
         </Text>
       </Text>
@@ -72,4 +107,4 @@ const EmailLoginMethod = () => {
   );
 };
 
-export default EmailLoginMethod;
+export default EmailLogin;

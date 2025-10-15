@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "334252598731",
+    "project_id": "mind-flow-2f235",
+    "storage_bucket": "mind-flow-2f235.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334252598731:android:06d3f15c24911906b2024e",
+        "android_client_info": {
+          "package_name": "com.maphy9.mindflow"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "334252598731-ukvvabv85qk6e8q1n0orlpf7mldf6re3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.maphy9.mindflow",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "334252598731-sch0nqolvpeon6k8m32p98v99l9kbfdh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoTMu8A7pvNzXG9RsKf5I9sumgw_POs8w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "334252598731-sch0nqolvpeon6k8m32p98v99l9kbfdh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "334252598731-hjivubp961k3ug05jfh60fespnqufvat.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.maphy9.mindflow"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
