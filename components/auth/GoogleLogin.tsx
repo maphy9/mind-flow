@@ -3,6 +3,7 @@ import React from "react";
 import googleLogo from "@/assets/images/google-logo.png";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/authContext";
+import { useRouter } from "expo-router";
 
 const GoogleLogin = () => {
   const { loginWithGoogle } = useAuth();

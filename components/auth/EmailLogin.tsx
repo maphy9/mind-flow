@@ -5,10 +5,13 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/authContext";
 import { useDispatch } from "react-redux";
 import { showAlert } from "@/redux/states/alerts";
+import { isValidEmail } from "@/utils/email";
+import { useRouter } from "expo-router";
 
 const EmailLogin = () => {
+  const router = useRouter();
   const theme = useTheme();
-  const { login, signOut } = useAuth();
+  const { login } = useAuth();
   const dispatch = useDispatch();
 
   const styles = StyleSheet.create({
@@ -47,14 +50,8 @@ const EmailLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const isValidEmail = () => {
-    const s = email.trim();
-    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return pattern.test(s);
-  };
-
   const handleLogin = () => {
-    if (!isValidEmail()) {
+    if (!isValidEmail(email)) {
       dispatch(showAlert({ text: "Invalid email", type: "error" }));
       return;
     }
@@ -89,14 +86,20 @@ const EmailLogin = () => {
 
       <Text style={styles.infoText}>
         Forgot your password?{" "}
-        <Text style={{ color: theme.surface, fontWeight: "bold" }}>
+        <Text
+          style={{ color: theme.surface, fontWeight: "bold" }}
+          onPress={() => router.push("/reset-password")}
+        >
           Reset password
         </Text>
       </Text>
 
       <Text style={styles.infoText}>
         Don’t have an account?{" "}
-        <Text style={{ color: theme.surface, fontWeight: "bold" }}>
+        <Text
+          style={{ color: theme.surface, fontWeight: "bold" }}
+          onPress={() => router.push("/sign-up")}
+        >
           Sign up
         </Text>
       </Text>

@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import React from "react";
 import { Slot } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
@@ -9,17 +9,15 @@ import Snackbar from "@/components/general/Snackbar";
 
 const _layout = () => {
   const theme = useTheme();
-  const styles = StyleSheet.create({
-    layout: {
-      flex: 1,
-      backgroundColor: theme.primary,
-    },
-  });
-
   return (
     <Provider store={store}>
       <AuthProvider>
-        <View style={styles.layout}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: theme.primary,
+          }}
+        >
           <Slot />
 
           <Snackbar />

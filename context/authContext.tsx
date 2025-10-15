@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   signOut as _signOut,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from "@react-native-firebase/auth";
 import { GoogleSignin } from "react-native-google-signin";
 import { useDispatch } from "react-redux";
@@ -35,7 +36,33 @@ export function AuthProvider({ children }) {
   }
 
   function signUp(email, password) {
-    return createUserWithEmailAndPassword(auth, email, password);
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        dispatch(showAlert({ text: "Success, try loggin in", type: "info" }));
+      })
+      .catch(() => {
+        dispatch(showAlert({ text: "Couldn't sign you up", type: "error" }));
+      });
+  }
+
+  function resetPassword(email) {
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        dispatch(
+          showAlert({
+            text: "Check your email",
+            type: "info",
+          })
+        );
+      })
+      .catch(() => {
+        dispatch(
+          showAlert({
+            text: "Failed to send password reset link",
+            type: "error",
+          })
+        );
+      });
   }
 
   async function loginWithGoogle() {
@@ -44,11 +71,15 @@ export function AuthProvider({ children }) {
     const idToken = signInResult.idToken;
     if (!idToken) {
       dispatch(showAlert({ text: "Something went wrong", type: "error" }));
-      return;
+      return false;
     }
     const googleCredential = GoogleAuthProvider.credential(idToken);
 
-    return signInWithCredential(auth, googleCredential);
+    signInWithCredential(auth, googleCredential).catch(() => {
+      dispatch(
+        showAlert({ text: "Couldn't login with google", type: "error" })
+      );
+    });
   }
 
   useEffect(() => {
@@ -71,6 +102,7 @@ export function AuthProvider({ children }) {
     login,
     signOut,
     signUp,
+    resetPassword,
     loginWithGoogle,
   };
 
