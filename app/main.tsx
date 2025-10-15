@@ -5,7 +5,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Text from "@/components/general/Text";
 import { useRouter } from "expo-router";
 
-const main = () => {
+const Main = () => {
   const router = useRouter();
   const { currentUser, signOut } = useAuth();
   const theme = useTheme();
@@ -60,4 +60,4 @@ const main = () => {
   );
 };
 
-export default main;
+export default Main;

@@ -79,7 +79,7 @@ const EmailSignUp = () => {
   const [password, setPassword] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!isValidEmail(email)) {
       dispatch(showAlert({ text: "Invalid email", type: "error" }));
       return;
@@ -88,7 +88,10 @@ const EmailSignUp = () => {
       dispatch(showAlert({ text: "Please accept the terms", type: "error" }));
       return;
     }
-    signUp(email, password);
+    const success = await signUp(email, password);
+    if (success) {
+      router.push("/login");
+    }
   };
 
   const canSignUp = termsAccepted && email.trim() && password.trim();

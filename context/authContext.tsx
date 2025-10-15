@@ -35,34 +35,36 @@ export function AuthProvider({ children }) {
     return _signOut(auth);
   }
 
-  function signUp(email, password) {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        dispatch(showAlert({ text: "Success, try loggin in", type: "info" }));
-      })
-      .catch(() => {
-        dispatch(showAlert({ text: "Couldn't sign you up", type: "error" }));
-      });
+  async function signUp(email, password) {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      dispatch(showAlert({ text: "Success, try loggin in", type: "info" }));
+      return true;
+    } catch {
+      dispatch(showAlert({ text: "Couldn't sign you up", type: "error" }));
+      return false;
+    }
   }
 
-  function resetPassword(email) {
-    sendPasswordResetEmail(auth, email)
-      .then(() => {
-        dispatch(
-          showAlert({
-            text: "Check your email",
-            type: "info",
-          })
-        );
-      })
-      .catch(() => {
-        dispatch(
-          showAlert({
-            text: "Failed to send password reset link",
-            type: "error",
-          })
-        );
-      });
+  async function resetPassword(email) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      dispatch(
+        showAlert({
+          text: "Check your email",
+          type: "info",
+        })
+      );
+      return true;
+    } catch {
+      dispatch(
+        showAlert({
+          text: "Failed to send password reset link",
+          type: "error",
+        })
+      );
+      return false;
+    }
   }
 
   async function loginWithGoogle() {

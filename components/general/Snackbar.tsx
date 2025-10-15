@@ -16,7 +16,7 @@ const Snackbar = () => {
   const theme = useTheme();
 
   const backgroundColor =
-    alerts[0]?.type === "info" ? theme.primary : theme.red;
+    alerts[0]?.type === "info" ? theme.surface : theme.red;
   const fontColor = alerts[0]?.type === "info" ? theme.secondary : "#FFFFFF";
 
   const style = StyleSheet.create({
