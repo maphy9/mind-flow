@@ -5,7 +5,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Text from "@/components/general/Text";
 import { useRouter } from "expo-router";
 
-const Main = () => {
+const Home = () => {
   const router = useRouter();
   const { currentUser, signOut } = useAuth();
   const theme = useTheme();
@@ -23,7 +23,7 @@ const Main = () => {
       elevation: 2,
       marginBottom: 10,
       color: theme.secondary,
-      backgroundColor: theme.surfaceAccent,
+      backgroundColor: theme.surface,
     },
     buttonText: {
       color: theme.secondary,
@@ -51,7 +51,7 @@ const Main = () => {
 
       <TouchableOpacity
         activeOpacity={0.8}
-        style={[styles.input, { backgroundColor: theme.surface }]}
+        style={styles.input}
         onPress={signOut}
       >
         <Text style={styles.buttonText}>Sign out</Text>
@@ -60,4 +60,4 @@ const Main = () => {
   );
 };
 
-export default Main;
+export default Home;
