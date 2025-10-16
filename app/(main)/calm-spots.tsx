@@ -1,11 +1,12 @@
-import { View, Text } from "react-native";
 import React from "react";
+import { LocationProvider } from "@/context/locationContext";
+import CalmSpotsMap from "@/components/main/calm-spots/CalmSpotsMap";
 
 const CalmSpots = () => {
   return (
-    <View>
-      <Text>Calm-spots</Text>
-    </View>
+    <LocationProvider>
+      <CalmSpotsMap />
+    </LocationProvider>
   );
 };
 
