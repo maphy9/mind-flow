@@ -11,7 +11,7 @@ const Login = () => {
 
   useEffect(() => {
     if (currentUser !== null) {
-      router.push("/main");
+      router.push("/home");
     }
   }, [currentUser]);
 
