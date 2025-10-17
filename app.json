@@ -41,7 +41,14 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow MindFlow to use your location."
+        }
+      ],
+      "expo-asset"
     ]
   }
 }
