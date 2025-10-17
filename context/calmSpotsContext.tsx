@@ -1,5 +1,5 @@
 import { DEFAULT_DISTANCE } from "@/constants/location";
-import { CalmSpot } from "@/types/calmSpot";
+import { CalmSpot, calmSpotEquals } from "@/types/calmSpot";
 import { kilometersToGCS } from "@/utils/location";
 import {
   query,
@@ -16,7 +16,8 @@ export function useCalmSpots() {
 }
 
 export const CalmSpotsProvider = ({ children }) => {
-  const [calmSpots, setCalmSpots] = useState(null);
+  const [calmSpots, setCalmSpots] = useState<CalmSpot[] | null>(null);
+  const [selectedCalmSpot, setSelectedCalmSpot] = useState<CalmSpot>(null);
 
   const getNearbyCalmSpots = async (location, distance = DEFAULT_DISTANCE) => {
     const { lat: dLat, lng: dLng } = kilometersToGCS(distance);
@@ -31,12 +32,26 @@ export const CalmSpotsProvider = ({ children }) => {
       where("lng", ">=", location.lng - dLng)
     );
 
-    const result = (await q.get()).docs.map((doc) => doc.data());
+    const result = (await q.get()).docs.map((doc) => doc.data()) as CalmSpot[];
     setCalmSpots(result);
+  };
+
+  const selectRandomCalmSpot = () => {
+    if (calmSpots === null || calmSpots.length === 1) {
+      return;
+    }
+
+    let randomIndex = Math.floor(Math.random() * calmSpots.length);
+    while (calmSpotEquals(selectedCalmSpot, calmSpots[randomIndex])) {
+      randomIndex = Math.floor(Math.random() * calmSpots.length);
+    }
+    setSelectedCalmSpot(calmSpots[randomIndex]);
   };
 
   const value = {
     calmSpots,
+    selectedCalmSpot,
+    selectRandomCalmSpot,
     getNearbyCalmSpots,
   };
 

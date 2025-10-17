@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { LeafletView } from "react-native-leaflet-view";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useLocation } from "@/context/locationContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCalmSpots } from "@/context/calmSpotsContext";
 import { useDispatch } from "react-redux";
 import { showAlert } from "@/redux/states/alerts";
@@ -14,12 +14,28 @@ import { CalmSpot } from "@/types/calmSpot";
 const CalmSpotsMap = () => {
   const theme = useTheme();
   const { location } = useLocation();
-  const { calmSpots, getNearbyCalmSpots } = useCalmSpots();
+  const {
+    calmSpots,
+    selectedCalmSpot,
+    selectRandomCalmSpot,
+    getNearbyCalmSpots,
+  } = useCalmSpots();
+  const [centerPosition, setCenterPosition] = useState(DEFAULT_LOCATION);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    getNearbyCalmSpots(location ?? DEFAULT_LOCATION);
+    getNearbyCalmSpots(DEFAULT_LOCATION);
   }, [location]);
+
+  useEffect(() => {
+    if (selectedCalmSpot === null) {
+      return;
+    }
+    setCenterPosition({
+      lat: selectedCalmSpot.lat,
+      lng: selectedCalmSpot.lng,
+    });
+  }, [selectedCalmSpot]);
 
   return (
     <ScrollView
@@ -28,7 +44,7 @@ const CalmSpotsMap = () => {
     >
       <View style={styles.mapContainer}>
         <LeafletView
-          mapCenterPosition={location ?? DEFAULT_LOCATION}
+          mapCenterPosition={centerPosition}
           zoom={13}
           doDebug={false}
           onMessageReceived={() => {}}
@@ -55,7 +71,7 @@ const CalmSpotsMap = () => {
       <TouchableOpacity
         activeOpacity={0.8}
         style={[styles.button, { backgroundColor: theme.surface }]}
-        onPress={() => {}}
+        onPress={selectRandomCalmSpot}
       >
         <Text style={[styles.buttonText, { color: theme.secondary }]}>
           <FontAwesome name="map-marker" size={28} color={theme.secondary} />
