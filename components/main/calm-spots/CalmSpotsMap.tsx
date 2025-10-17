@@ -1,12 +1,25 @@
 import Text from "@/components/general/Text";
-import { DEFAULT_LOCATION } from "@/constants/map";
+import { DEFAULT_LOCATION } from "@/constants/location";
 import { useTheme } from "@/hooks/useTheme";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { LeafletView } from "react-native-leaflet-view";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useLocation } from "@/context/locationContext";
+import { useEffect } from "react";
+import { useCalmSpots } from "@/context/calmSpotsContext";
+import { useDispatch } from "react-redux";
+import { showAlert } from "@/redux/states/alerts";
+import { CalmSpot } from "@/types/calmSpot";
 
 const CalmSpotsMap = () => {
   const theme = useTheme();
+  const { location } = useLocation();
+  const { calmSpots, getNearbyCalmSpots } = useCalmSpots();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    getNearbyCalmSpots(location ?? DEFAULT_LOCATION);
+  }, [location]);
 
   return (
     <ScrollView
@@ -15,31 +28,27 @@ const CalmSpotsMap = () => {
     >
       <View style={styles.mapContainer}>
         <LeafletView
-          mapCenterPosition={{
-            lat: DEFAULT_LOCATION.latitude,
-            lng: DEFAULT_LOCATION.longitude,
-          }}
+          mapCenterPosition={location ?? DEFAULT_LOCATION}
           zoom={13}
-          mapMarkers={[
-            {
-              position: { lat: 51.7731091, lng: 19.3980023 },
-              icon: "🌿",
-              size: [32, 32],
-              title: "Peaceful Park\nA quiet spot for meditation",
+          doDebug={false}
+          onMessageReceived={() => {}}
+          onError={() => {
+            dispatch(
+              showAlert({
+                text: "An error occured when showing the map",
+                type: "error",
+              })
+            );
+          }}
+          mapMarkers={(calmSpots ?? []).map((calmSpot: CalmSpot) => ({
+            icon: calmSpot.icon,
+            title: calmSpot.description,
+            iconSize: [32, 32],
+            position: {
+              lat: calmSpot.lat,
+              lng: calmSpot.lng,
             },
-            {
-              position: { lat: 51.78, lng: 19.4 },
-              icon: "🧘",
-              size: [32, 32],
-              title: "Yoga Studio\nMorning sessions available",
-            },
-            {
-              position: { lat: 51.765, lng: 19.39 },
-              icon: "🌳",
-              size: [32, 32],
-              title: "Forest Trail\nPerfect for mindful walks",
-            },
-          ]}
+          }))}
         />
       </View>
 

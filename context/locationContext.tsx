@@ -14,7 +14,6 @@ export function useLocation() {
 
 export function LocationProvider({ children }) {
   const [location, setLocation] = useState(null);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -30,7 +29,10 @@ export function LocationProvider({ children }) {
         return;
       }
       const location = await getCurrentPositionAsync({});
-      setLocation(location);
+      setLocation({
+        lat: location.coords.latitude,
+        lng: location.coords.longitude,
+      });
     }
 
     getCurrentLocation();
