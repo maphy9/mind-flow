@@ -1,14 +1,18 @@
-import { StyleSheet, View } from "react-native";
+import Text from "@/components/general/Text";
+import { DEFAULT_LOCATION } from "@/constants/map";
+import { useTheme } from "@/hooks/useTheme";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { LeafletView } from "react-native-leaflet-view";
-
-const DEFAULT_LOCATION = {
-  latitude: 51.7731091,
-  longitude: 19.3980023,
-};
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 const CalmSpotsMap = () => {
+  const theme = useTheme();
+
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flexGrow: 1, padding: 16, gap: 16 }}
+    >
       <View style={styles.mapContainer}>
         <LeafletView
           mapCenterPosition={{
@@ -38,19 +42,45 @@ const CalmSpotsMap = () => {
           ]}
         />
       </View>
-    </View>
+
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={[styles.button, { backgroundColor: theme.surface }]}
+        onPress={() => {}}
+      >
+        <Text style={[styles.buttonText, { color: theme.secondary }]}>
+          <FontAwesome name="map-marker" size={28} color={theme.secondary} />
+          {"  "}
+          Find another calm spot
+        </Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
   mapContainer: {
     flex: 1,
     borderRadius: 20,
     overflow: "hidden",
+    minHeight: 420,
+  },
+  buttonText: {
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 20,
+  },
+  button: {
+    width: "100%",
+    paddingVertical: 10,
+    borderRadius: 100,
+    paddingHorizontal: 20,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 2,
   },
 });
 
