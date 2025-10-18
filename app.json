@@ -5,30 +5,34 @@
     "slug": "mind-flow",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo-light.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/logo-light.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#D5EDD7"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.maphy9.mindflow",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "icon": {
+        "light": "./assets/images/logo-light.png",
+        "dark": "./assets/images/logo-dark.png"
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/logo-light.png",
+        "backgroundColor": "#D5EDD7"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.maphy9.mindflow",
       "googleServicesFile": "./google-services.json"
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/logo-light.png"
     },
     "plugins": [
       "expo-router",
@@ -48,7 +52,19 @@
           "locationAlwaysAndWhenInUsePermission": "Allow MindFlow to use your location."
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#D5EDD7",
+          "image": "./assets/images/logo-light.png",
+          "dark": {
+            "image": "./assets/images/logo-dark.png",
+            "backgroundColor": "#2B5743"
+          },
+          "imageWidth": 200
+        }
+      ]
     ]
   }
 }

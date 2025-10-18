@@ -2,7 +2,7 @@ import { useTheme } from "@/hooks/useTheme";
 import React from "react";
 import { Image, ImageBackground, StyleSheet, View } from "react-native";
 import Text from "../general/Text";
-import logo from "@/assets/images/logo-dark.png";
+import logo from "@/assets/images/vector-logo.png";
 import logoBoxDark from "@/assets/images/logo-box-dark.png";
 import logoBoxLight from "@/assets/images/logo-box-light.png";
 import { SafeAreaView } from "react-native-safe-area-context";
