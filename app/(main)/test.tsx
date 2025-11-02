@@ -28,33 +28,36 @@ const TestScreen = () => {
   };
 
   const calculateAndSaveResults = (finalAnswers: Record<string, number>) => {
-    const burnoutScoring = testData.scoring.burnout;
-    let burnoutScore = 0;
+    const { depression, loneliness, burnout } = testData.scoring;
 
-    if (burnoutScoring.method === "average") {
-      const total = burnoutScoring.items.reduce((acc, itemId) => {
-        return acc + (finalAnswers[itemId] || 0);
-      }, 0);
-      burnoutScore = total / burnoutScoring.items.length;
-    }
+    // 1. Raw scores
+    const depScore = depression.items.reduce(
+      (acc, id) => acc + (finalAnswers[id] || 0),
+      0
+    );
+    const lonScore = loneliness.items.reduce(
+      (acc, id) => acc + (finalAnswers[id] || 0),
+      0
+    );
+    const boTotal = burnout.items.reduce(
+      (acc, id) => acc + (finalAnswers[id] || 0),
+      0
+    );
+    const boScore = boTotal / burnout.items.length;
+
+    // 2. Normalization (0-1, higher is better)
+    const depNorm = 1 - depScore / 27;
+    const lonNorm = 1 - lonScore / 6;
+    const boNorm = 1 - boScore / 100;
+
+    // 3. Weighted average
+    const overallRating = (depNorm * 0.4 + lonNorm * 0.3 + boNorm * 0.3) * 100;
 
     // Navigate back to home with the new chill score
     router.replace({
       pathname: "/(main)/home",
-      params: { newChillScore: burnoutScore.toFixed(2) },
+      params: { newChillScore: overallRating.toFixed(0) }, // Round to integer
     });
-  };
-
-  const getSeverity = (
-    score: number,
-    severityLevels: { min: number; max: number; label: string }[]
-  ) => {
-    for (const level of severityLevels) {
-      if (score >= level.min && score <= level.max) {
-        return level.label;
-      }
-    }
-    return "Unknown";
   };
 
   const currentQuestion = testData.questions[currentQuestionIndex];
