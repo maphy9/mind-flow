@@ -1,5 +1,5 @@
-// app/(main)/home.tsx
-import React from "react";
+
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,14 +9,11 @@ import {
   Pressable,
   Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import DailyWellness from "@/components/main/Daily-wellness/DailyWellness";
+import TestPromptModal from "@/components/main/TestPromptModal";
 
-/**
- * Локальні зображення за назвою:
- * Додаси нове — просто допиши пару "ім'я: require(...)" нижче.
- */
 const getLocalImage = (name: string) => {
   const table: Record<string, any> = {
     map: require("@/assets/images/map.png"),
@@ -27,6 +24,7 @@ const getLocalImage = (name: string) => {
 
 const HomeScreen = () => {
   const router = useRouter();
+  const params = useLocalSearchParams<{ newChillScore?: string }>();
   const theme =
     useTheme?.() ?? {
       primary: "#2E7D32",
@@ -40,14 +38,60 @@ const HomeScreen = () => {
       accent: "#47B57A",
     };
 
-  const streakDays = 7;
-  const chillScore = 82;
+  const [streakDays, setStreakDays] = useState(7);
+  const [chillScore, setChillScore] = useState(82);
+  const [modalVisible, setModalVisible] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (params.newChillScore) {
+      const score = Math.round(parseFloat(params.newChillScore));
+      if (!isNaN(score)) {
+        setChillScore(score);
+      }
+    }
+  }, [params.newChillScore]);
+
+  const resetTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => {
+      setModalVisible(true);
+    }, 60000); // 1 minute
+  };
+
+  useEffect(() => {
+    resetTimer();
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  const handleStartTest = () => {
+    setModalVisible(false);
+    resetTimer();
+    router.push("/(main)/test");
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    resetTimer();
+  };
 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.primarySoft }}
       contentContainerStyle={styles.scroll}
     >
+      <TestPromptModal
+        visible={modalVisible}
+        onClose={handleCloseModal}
+        onStart={handleStartTest}
+      />
+
       {/* Header */}
       <Text style={[styles.header, { color: theme.text }]}>Home Screen</Text>
 
@@ -85,7 +129,7 @@ const HomeScreen = () => {
 type ExploreCardProps = {
   title: string;
   subtitle: string;
-  imageName: string; // ім'я в таблиці getLocalImage()
+  imageName: string;
   onPress: () => void;
 };
 
@@ -95,7 +139,6 @@ const ExploreCard: React.FC<ExploreCardProps> = ({
   imageName,
   onPress,
 }) => {
-  // квадрат 1×1, трохи більший за попередній прев’ю
   const PREVIEW_SIZE = 100;
 
   return (
@@ -149,8 +192,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 10,
   },
-
-  /** ---- EXPLORE CARD ---- */
   cardShadow: {
     marginTop: 12,
     borderRadius: 20,
@@ -228,7 +269,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   thumbImg: {
-    // базові стилі для прев’ю; конкретний розмір задаємо в компоненті
     borderWidth: 0.8,
     borderColor: "#E5E7EB",
     backgroundColor: "#F9FAFB",
