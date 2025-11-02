@@ -9,9 +9,23 @@ export type DailyWellnessProps = {
   streakDays: number;
   chillScore: number;
   onStatsPress: () => void;
+
+  /** РУЧКИ ДЛЯ ВИРІВНЮВАННЯ (у px, додатне значення зсуває вниз) */
+  streakUnitOffsetY?: number;      // зсув для "days"
+  scoreUnitOffsetY?: number;       // зсув для "score"
+  streakNumberOffsetY?: number;    // зсув для великої цифри зліва
+  scoreNumberOffsetY?: number;     // зсув для великої цифри справа
 };
 
-const DailyWellness: React.FC<DailyWellnessProps> = ({ streakDays, chillScore, onStatsPress }) => {
+const DailyWellness: React.FC<DailyWellnessProps> = ({
+  streakDays,
+  chillScore,
+  onStatsPress,
+  streakUnitOffsetY = -7,
+  scoreUnitOffsetY = -1,
+  streakNumberOffsetY = 0,
+  scoreNumberOffsetY = 6,
+}) => {
   const { width } = useWindowDimensions();
   const isSmall = width < 380;
 
@@ -21,6 +35,9 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({ streakDays, chillScore, o
     numberSize: isSmall ? 56 : 64,
     unitSize: isSmall ? 18 : 20,
   };
+
+  // Базова iOS-корекція (можеш міняти глобально тут)
+  const IOS_BASELINE_TWEAK = -2;
 
   return (
     <>
@@ -34,8 +51,36 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({ streakDays, chillScore, o
           </Text>
 
           <View style={[styles.centerRow, { marginTop: -20 }]}>
-            <Text style={[styles.number, { fontSize: S.numberSize, lineHeight: S.numberSize }]}>{streakDays}</Text>
-            <Text style={[styles.unit, { fontSize: S.unitSize }]} numberOfLines={1} adjustsFontSizeToFit>
+            <Text
+              style={[
+                styles.number,
+                {
+                  fontSize: S.numberSize,
+                  lineHeight: S.numberSize,
+                  transform: [{ translateY: streakNumberOffsetY }],
+                },
+              ]}
+            >
+              {streakDays}
+            </Text>
+
+            <Text
+              style={[
+                styles.unit,
+                {
+                  fontSize: S.unitSize,
+                  lineHeight: S.unitSize,
+                  transform: [
+                    {
+                      translateY:
+                        (Platform.OS === "ios" ? IOS_BASELINE_TWEAK : 0) + streakUnitOffsetY,
+                    },
+                  ],
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
               days
             </Text>
           </View>
@@ -43,16 +88,43 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({ streakDays, chillScore, o
           <View style={{ height: 6 }} />
         </View>
 
-        {/* Right tile: Chill score */}
+        {/* Right tile: Overall rating */}
         <View style={[styles.tile, { height: S.tileHeight }]}>
           <Text style={[styles.tileTitle, { fontSize: S.titleSize }]} numberOfLines={2}>
-            Current chill score
+            Overall rating
           </Text>
 
-          {/* Правий рядок без зсуву */}
           <View style={styles.centerRow}>
-            <Text style={[styles.number, { fontSize: S.numberSize, lineHeight: S.numberSize }]}>{chillScore}</Text>
-            <Text style={[styles.unit, { fontSize: S.unitSize }]} numberOfLines={1} adjustsFontSizeToFit>
+            <Text
+              style={[
+                styles.number,
+                {
+                  fontSize: S.numberSize,
+                  lineHeight: S.numberSize,
+                  transform: [{ translateY: scoreNumberOffsetY }],
+                },
+              ]}
+            >
+              {chillScore}
+            </Text>
+
+            <Text
+              style={[
+                styles.unit,
+                {
+                  fontSize: S.unitSize,
+                  lineHeight: S.unitSize,
+                  transform: [
+                    {
+                      translateY:
+                        (Platform.OS === "ios" ? IOS_BASELINE_TWEAK : 0) + scoreUnitOffsetY,
+                    },
+                  ],
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
               score
             </Text>
           </View>
@@ -86,7 +158,7 @@ const styles = StyleSheet.create({
     paddingLeft: 18,
     paddingTop: 16,
     paddingBottom: 12,
-    paddingRight: 18, // більше простору справа, щоб текст не “вилазив”
+    paddingRight: 18,
     justifyContent: "space-between",
     ...Platform.select({
       ios: {
@@ -102,28 +174,29 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: TEXT_DARK,
     marginBottom: 6,
-    flexShrink: 1, // дозволяє стискати довгі заголовки
+    flexShrink: 1,
   },
   centerRow: {
     flexDirection: "row",
-    alignItems: "center", // рівне вертикальне вирівнювання цифри і слова
+    alignItems: "flex-end", // базове вирівнювання по нижньому краю
     columnGap: 10,
-    // без marginTop тут — зсув задаємо точково лише для лівої плитки
   },
   number: {
     fontWeight: "800",
     color: TEXT_DARK,
     letterSpacing: -0.5,
+    includeFontPadding: false, // Android: прибирає зайві поля шрифту
   },
   unit: {
     fontWeight: "700",
     color: TEXT_DARK,
-    flexShrink: 1, // не дає штовхати за межі
+    flexShrink: 1,
+    includeFontPadding: false, // Android: прибирає зайві поля шрифту
   },
   linkContainer: {
     alignSelf: "flex-start",
     maxWidth: "100%",
-    paddingRight: 4, // запас, щоб стрілка не торкалась краю
+    paddingRight: 4,
   },
   linkText: {
     fontSize: 16,
