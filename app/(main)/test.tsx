@@ -10,9 +10,12 @@ import {
 import { useRouter } from "expo-router";
 import { Card } from "react-native-paper";
 import testData from "@/assets/tests/tests.json";
+import { useTheme } from "@/hooks/useTheme";
 
 const TestScreen = () => {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
@@ -30,7 +33,6 @@ const TestScreen = () => {
   const calculateAndSaveResults = (finalAnswers: Record<string, number>) => {
     const { depression, loneliness, burnout } = testData.scoring;
 
-    // 1. Raw scores
     const depScore = depression.items.reduce(
       (acc, id) => acc + (finalAnswers[id] || 0),
       0
@@ -45,15 +47,12 @@ const TestScreen = () => {
     );
     const boScore = boTotal / burnout.items.length;
 
-    // 2. Normalization (0-1, higher is better)
     const depNorm = 1 - depScore / 27;
     const lonNorm = 1 - lonScore / 6;
     const boNorm = 1 - boScore / 100;
 
-    // 3. Weighted average
     const overallRating = (depNorm * 0.4 + lonNorm * 0.3 + boNorm * 0.3) * 100;
 
-    // Navigate back to home with the new chill score
     router.replace({
       pathname: "/(main)/home",
       params: { newChillScore: overallRating.toFixed(0) }, // Round to integer
@@ -88,41 +87,41 @@ const TestScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
     justifyContent: "center",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.primaryAccent,
   },
   card: {
     marginBottom: 24,
     borderRadius: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.primary,
   },
    progressIndicator: {
     textAlign: "center",
     marginBottom: 16,
-    color: "#6B7280",
+    color: theme.secondaryAccent,
     fontWeight: "500",
   },
   questionText: {
     fontSize: 18,
     textAlign: "center",
     lineHeight: 26,
-    color: "#111827",
+    color: theme.secondary,
   },
   optionsContainer: {
     marginTop: 16,
   },
   optionButton: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.primary,
     paddingVertical: 18,
     paddingHorizontal: 16,
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: theme.primaryAccent,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 5,
@@ -132,7 +131,7 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     textAlign: "center",
-    color: "#374151",
+    color: theme.secondary,
     fontWeight: "500",
   },
 });

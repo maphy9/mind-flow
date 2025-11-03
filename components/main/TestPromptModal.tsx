@@ -2,6 +2,7 @@
 import React from "react";
 import { Modal, View, Text, StyleSheet } from "react-native";
 import { Button, Card } from "react-native-paper";
+import { useTheme } from "@/hooks/useTheme";
 
 type Props = {
   visible: boolean;
@@ -10,6 +11,9 @@ type Props = {
 };
 
 const TestPromptModal: React.FC<Props> = ({ visible, onClose, onStart }) => {
+  const theme = useTheme();
+  const styles = getStyles(theme);
+
   return (
     <Modal
       visible={visible}
@@ -24,15 +28,15 @@ const TestPromptModal: React.FC<Props> = ({ visible, onClose, onStart }) => {
             <Text style={styles.questionText}>Would you like to take a quick survey?</Text>
           </Card.Content>
           <Card.Actions style={styles.actions}>
-            <Button onPress={onClose} color="#6B7280">
+            <Button onPress={onClose} color={theme.secondaryAccent}>
               Maybe later
             </Button>
             <Button
               onPress={onStart}
               mode="contained"
               style={styles.startButton}
-              labelStyle={{ color: "#FFFFFF" }}
-              theme={{ colors: { primary: "#49B98A" } }}
+              labelStyle={{ color: theme.primary }}
+              theme={{ colors: { primary: theme.surface } }}
             >
               Start
             </Button>
@@ -43,7 +47,7 @@ const TestPromptModal: React.FC<Props> = ({ visible, onClose, onStart }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: "center",
@@ -54,19 +58,19 @@ const styles = StyleSheet.create({
     width: "85%",
     maxWidth: 400,
     borderRadius: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.primary,
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 16,
-    color: "#111827",
+    color: theme.secondary,
   },
   questionText: {
     fontSize: 15,
     textAlign: "center",
-    color: "#111827",
+    color: theme.secondary,
     lineHeight: 22,
   },
   actions: {

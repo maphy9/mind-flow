@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -25,18 +24,8 @@ const getLocalImage = (name: string) => {
 const HomeScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams<{ newChillScore?: string }>();
-  const theme =
-    useTheme?.() ?? {
-      primary: "#2E7D32",
-      primarySoft: "#DDF3E3",
-      surface: "#FFFFFF",
-      text: "#111827",
-      textMuted: "#6B7280",
-      card: "#FFFFFF",
-      border: "#E5E7EB",
-      shadow: "rgba(0,0,0,0.10)",
-      accent: "#47B57A",
-    };
+  const theme = useTheme();
+  const styles = getStyles(theme);
 
   const [streakDays, setStreakDays] = useState(7);
   const [chillScore, setChillScore] = useState(82);
@@ -83,7 +72,7 @@ const HomeScreen = () => {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: theme.primarySoft }}
+      style={{ flex: 1, backgroundColor: theme.primaryAccent }}
       contentContainerStyle={styles.scroll}
     >
       <TestPromptModal
@@ -93,9 +82,9 @@ const HomeScreen = () => {
       />
 
       {/* Header */}
-      <Text style={[styles.header, { color: theme.text }]}>Home Screen</Text>
+      <Text style={[styles.header, { color: theme.secondary }]}>Home Screen</Text>
 
-      {/* ✅ Daily Wellness (підключений компонент) */}
+      {/* Daily Wellness (підключений компонент) */}
       <DailyWellness
         streakDays={streakDays}
         chillScore={chillScore}
@@ -103,7 +92,7 @@ const HomeScreen = () => {
       />
 
       {/* Explore */}
-      <Text style={[styles.sectionTitle, { color: theme.text, marginTop: 14 }]}>
+      <Text style={[styles.sectionTitle, { color: theme.secondary, marginTop: 14 }]}>
         Explore
       </Text>
 
@@ -133,12 +122,9 @@ type ExploreCardProps = {
   onPress: () => void;
 };
 
-const ExploreCard: React.FC<ExploreCardProps> = ({
-  title,
-  subtitle,
-  imageName,
-  onPress,
-}) => {
+const ExploreCard: React.FC<ExploreCardProps> = ({ title, subtitle, imageName, onPress }) => {
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const PREVIEW_SIZE = 100;
 
   return (
@@ -175,7 +161,7 @@ const ExploreCard: React.FC<ExploreCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   scroll: {
     paddingHorizontal: 16,
     paddingTop: 12,
@@ -211,7 +197,7 @@ const styles = StyleSheet.create({
   exploreCard: {
     width: "100%",
     borderRadius: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.primary,
     padding: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -228,7 +214,7 @@ const styles = StyleSheet.create({
       },
     }),
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: theme.primaryAccent,
   },
   exploreTextCol: {
     flex: 1,
@@ -237,19 +223,19 @@ const styles = StyleSheet.create({
   exploreTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#111827",
+    color: theme.secondary,
     marginBottom: 4,
   },
   exploreSubtitle: {
     fontSize: 13,
-    color: "#6B7280",
+    color: theme.secondaryAccent,
     marginBottom: 12,
   },
   viewBtn: {
     alignSelf: "flex-start",
     paddingHorizontal: 18,
     paddingVertical: 10,
-    backgroundColor: "#47B57A",
+    backgroundColor: theme.surface,
     borderRadius: 28,
     ...Platform.select({
       ios: {
@@ -264,14 +250,14 @@ const styles = StyleSheet.create({
     }),
   },
   viewBtnText: {
-    color: "#0B0F0A",
+    color: theme.secondary,
     fontWeight: "700",
     fontSize: 16,
   },
   thumbImg: {
     borderWidth: 0.8,
-    borderColor: "#E5E7EB",
-    backgroundColor: "#F9FAFB",
+    borderColor: theme.primaryAccent,
+    backgroundColor: theme.surfaceAccent,
   },
 });
 

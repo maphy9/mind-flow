@@ -1,9 +1,7 @@
-// components/main/Daily-wellness/DailyWellness.tsx
+
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from "react-native";
-
-const TILE_BG = "#49B98A";
-const TEXT_DARK = "#0B0F0A";
+import { useTheme } from "@/hooks/useTheme";
 
 export type DailyWellnessProps = {
   streakDays: number;
@@ -27,6 +25,8 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({
   scoreNumberOffsetY = 6,
 }) => {
   const { width } = useWindowDimensions();
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const isSmall = width < 380;
 
   const S = {
@@ -140,12 +140,12 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "800",
     marginBottom: 10,
-    color: "#111827",
+    color: theme.secondary,
   },
   row: {
     flexDirection: "row",
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   tile: {
     flex: 1,
-    backgroundColor: TILE_BG,
+    backgroundColor: theme.surface,
     borderRadius: 24,
     paddingLeft: 18,
     paddingTop: 16,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   tileTitle: {
     fontWeight: "700",
-    color: TEXT_DARK,
+    color: theme.secondary,
     marginBottom: 6,
     flexShrink: 1,
   },
@@ -183,13 +183,13 @@ const styles = StyleSheet.create({
   },
   number: {
     fontWeight: "800",
-    color: TEXT_DARK,
+    color: theme.secondary,
     letterSpacing: -0.5,
     includeFontPadding: false, // Android: прибирає зайві поля шрифту
   },
   unit: {
     fontWeight: "700",
-    color: TEXT_DARK,
+    color: theme.secondary,
     flexShrink: 1,
     includeFontPadding: false, // Android: прибирає зайві поля шрифту
   },
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 16,
-    color: TEXT_DARK,
+    color: theme.secondary,
   },
   linkUnderline: {
     textDecorationLine: "underline",
