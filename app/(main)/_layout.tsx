@@ -1,3 +1,4 @@
+
 import { Tabs } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
@@ -89,6 +90,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="test"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
