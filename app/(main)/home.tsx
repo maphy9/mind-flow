@@ -75,35 +75,33 @@ const HomeScreen = () => {
         onStart={handleStartTest}
       />
 
-      {/* Daily Wellness (підключений компонент) */}
       <DailyWellness
         streakDays={streakDays}
         chillScore={chillScore}
         onStatsPress={() => router.push("/(main)/settings")}
       />
 
-      {/* Explore */}
-      <Text
-        style={[styles.sectionTitle, { color: theme.secondary, marginTop: 14 }]}
+      <View
+        style={{
+          paddingVertical: 24,
+        }}
       >
-        Explore
-      </Text>
+        <Text style={[styles.sectionTitle]}>Explore</Text>
 
-      <ExploreCard
-        title="Relaxation spots map"
-        subtitle="Discover calming spots in the city"
-        image={mapImage}
-        onPress={() => router.push("/(main)/calm-spots")}
-      />
+        <ExploreCard
+          title="Relaxation spots map"
+          subtitle="Discover calming spots in the city"
+          image={mapImage}
+          onPress={() => router.push("/(main)/calm-spots")}
+        />
 
-      <ExploreCard
-        title="Chat with MindBot"
-        subtitle="Get personalized support and guidance"
-        image={mindbotImage}
-        onPress={() => router.push("/(main)/mind-bot")}
-      />
-
-      <View style={{ height: 24 }} />
+        <ExploreCard
+          title="Chat with MindBot"
+          subtitle="Get personalized support and guidance"
+          image={mindbotImage}
+          onPress={() => router.push("/(main)/mind-bot")}
+        />
+      </View>
     </ScrollView>
   );
 };
@@ -161,9 +159,10 @@ const getStyles = (theme) =>
       marginBottom: 8,
     },
     sectionTitle: {
-      fontSize: 16,
-      fontWeight: "700",
+      fontSize: 22,
+      fontWeight: "800",
       marginBottom: 10,
+      color: theme.secondary,
     },
     cardShadow: {
       marginTop: 12,

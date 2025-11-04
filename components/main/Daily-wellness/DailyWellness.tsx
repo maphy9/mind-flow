@@ -1,6 +1,12 @@
-
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  useWindowDimensions,
+} from "react-native";
 import { useTheme } from "@/hooks/useTheme";
 
 export type DailyWellnessProps = {
@@ -9,13 +15,13 @@ export type DailyWellnessProps = {
   onStatsPress: () => void;
 
   /** РУЧКИ ДЛЯ ВИРІВНЮВАННЯ (у px, додатне значення зсуває вниз) */
-  streakUnitOffsetY?: number;      // зсув для "days"
-  scoreUnitOffsetY?: number;       // зсув для "score"
-  streakNumberOffsetY?: number;    // зсув для великої цифри зліва
-  scoreNumberOffsetY?: number;     // зсув для великої цифри справа
+  streakUnitOffsetY?: number; // зсув для "days"
+  scoreUnitOffsetY?: number; // зсув для "score"
+  streakNumberOffsetY?: number; // зсув для великої цифри зліва
+  scoreNumberOffsetY?: number; // зсув для великої цифри справа
 };
 
-const DailyWellness: React.FC<DailyWellnessProps> = ({
+const DailyWellness = ({
   streakDays,
   chillScore,
   onStatsPress,
@@ -46,7 +52,10 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({
       <View style={styles.row}>
         {/* Left tile: Streak */}
         <View style={[styles.tile, { height: S.tileHeight }]}>
-          <Text style={[styles.tileTitle, { fontSize: S.titleSize }]} numberOfLines={2}>
+          <Text
+            style={[styles.tileTitle, { fontSize: S.titleSize }]}
+            numberOfLines={2}
+          >
             Your current streak
           </Text>
 
@@ -73,7 +82,8 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({
                   transform: [
                     {
                       translateY:
-                        (Platform.OS === "ios" ? IOS_BASELINE_TWEAK : 0) + streakUnitOffsetY,
+                        (Platform.OS === "ios" ? IOS_BASELINE_TWEAK : 0) +
+                        streakUnitOffsetY,
                     },
                   ],
                 },
@@ -90,7 +100,10 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({
 
         {/* Right tile: Overall rating */}
         <View style={[styles.tile, { height: S.tileHeight }]}>
-          <Text style={[styles.tileTitle, { fontSize: S.titleSize }]} numberOfLines={2}>
+          <Text
+            style={[styles.tileTitle, { fontSize: S.titleSize }]}
+            numberOfLines={2}
+          >
             Overall rating
           </Text>
 
@@ -117,7 +130,8 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({
                   transform: [
                     {
                       translateY:
-                        (Platform.OS === "ios" ? IOS_BASELINE_TWEAK : 0) + scoreUnitOffsetY,
+                        (Platform.OS === "ios" ? IOS_BASELINE_TWEAK : 0) +
+                        scoreUnitOffsetY,
                     },
                   ],
                 },
@@ -129,8 +143,16 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({
             </Text>
           </View>
 
-          <TouchableOpacity onPress={onStatsPress} activeOpacity={0.85} style={styles.linkContainer}>
-            <Text style={styles.linkText} numberOfLines={1} adjustsFontSizeToFit>
+          <TouchableOpacity
+            onPress={onStatsPress}
+            activeOpacity={0.85}
+            style={styles.linkContainer}
+          >
+            <Text
+              style={styles.linkText}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
               <Text style={styles.linkUnderline}>See more statistics</Text> ›
             </Text>
           </TouchableOpacity>
@@ -140,71 +162,72 @@ const DailyWellness: React.FC<DailyWellnessProps> = ({
   );
 };
 
-const getStyles = (theme) => StyleSheet.create({
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    marginBottom: 10,
-    color: theme.secondary,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  tile: {
-    flex: 1,
-    backgroundColor: theme.surface,
-    borderRadius: 24,
-    paddingLeft: 18,
-    paddingTop: 16,
-    paddingBottom: 12,
-    paddingRight: 18,
-    justifyContent: "space-between",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 8 },
-      },
-      android: { elevation: 6 },
-    }),
-  },
-  tileTitle: {
-    fontWeight: "700",
-    color: theme.secondary,
-    marginBottom: 6,
-    flexShrink: 1,
-  },
-  centerRow: {
-    flexDirection: "row",
-    alignItems: "flex-end", // базове вирівнювання по нижньому краю
-    columnGap: 10,
-  },
-  number: {
-    fontWeight: "800",
-    color: theme.secondary,
-    letterSpacing: -0.5,
-    includeFontPadding: false, // Android: прибирає зайві поля шрифту
-  },
-  unit: {
-    fontWeight: "700",
-    color: theme.secondary,
-    flexShrink: 1,
-    includeFontPadding: false, // Android: прибирає зайві поля шрифту
-  },
-  linkContainer: {
-    alignSelf: "flex-start",
-    maxWidth: "100%",
-    paddingRight: 4,
-  },
-  linkText: {
-    fontSize: 16,
-    color: theme.secondary,
-  },
-  linkUnderline: {
-    textDecorationLine: "underline",
-  },
-});
+const getStyles = (theme) =>
+  StyleSheet.create({
+    sectionTitle: {
+      fontSize: 22,
+      fontWeight: "800",
+      marginBottom: 10,
+      color: theme.secondary,
+    },
+    row: {
+      flexDirection: "row",
+      gap: 12,
+    },
+    tile: {
+      flex: 1,
+      backgroundColor: theme.surface,
+      borderRadius: 24,
+      paddingLeft: 18,
+      paddingTop: 16,
+      paddingBottom: 12,
+      paddingRight: 18,
+      justifyContent: "space-between",
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 8 },
+        },
+        android: { elevation: 6 },
+      }),
+    },
+    tileTitle: {
+      fontWeight: "700",
+      color: theme.secondary,
+      marginBottom: 6,
+      flexShrink: 1,
+    },
+    centerRow: {
+      flexDirection: "row",
+      alignItems: "flex-end", // базове вирівнювання по нижньому краю
+      columnGap: 10,
+    },
+    number: {
+      fontWeight: "800",
+      color: theme.secondary,
+      letterSpacing: -0.5,
+      includeFontPadding: false, // Android: прибирає зайві поля шрифту
+    },
+    unit: {
+      fontWeight: "700",
+      color: theme.secondary,
+      flexShrink: 1,
+      includeFontPadding: false, // Android: прибирає зайві поля шрифту
+    },
+    linkContainer: {
+      alignSelf: "flex-start",
+      maxWidth: "100%",
+      paddingRight: 4,
+    },
+    linkText: {
+      fontSize: 16,
+      color: theme.secondary,
+    },
+    linkUnderline: {
+      textDecorationLine: "underline",
+    },
+  });
 
 export default DailyWellness;
