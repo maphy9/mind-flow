@@ -1,63 +1,32 @@
-import React, { useEffect } from "react";
-import { useAuth } from "@/context/authContext";
+import React from "react";
+import { StyleSheet, ScrollView } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import Text from "@/components/general/Text";
-import { useRouter } from "expo-router";
+import DailyWellness from "@/components/main/home/DailyWellness";
+import ExploreCards from "@/components/main/home/ExploreCards";
 
-const Home = () => {
-  const router = useRouter();
-  const { currentUser, signOut } = useAuth();
+const HomeScreen = () => {
   const theme = useTheme();
-  const styles = StyleSheet.create({
-    input: {
-      width: "100%",
-      height: 56,
-      borderRadius: 100,
-      paddingHorizontal: 20,
-      justifyContent: "center",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 6,
-      elevation: 2,
-      marginBottom: 10,
-      color: theme.secondary,
-      backgroundColor: theme.surface,
-    },
-    buttonText: {
-      color: theme.secondary,
-      fontWeight: "bold",
-      textAlign: "center",
-      fontSize: 24,
-    },
-  });
-
-  useEffect(() => {
-    if (currentUser === null) {
-      router.push("/login");
-    }
-  }, [currentUser]);
+  const styles = getStyles(theme);
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ color: theme.surface }}>
-        {currentUser
-          ? currentUser.displayName ?? currentUser.email
-          : "Not logged in"}
-      </Text>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: theme.primaryAccent }}
+      contentContainerStyle={styles.scroll}
+    >
+      <DailyWellness />
 
-      <Text style={{ color: theme.surface }}>Hello world</Text>
-
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={styles.input}
-        onPress={signOut}
-      >
-        <Text style={styles.buttonText}>Sign out</Text>
-      </TouchableOpacity>
-    </View>
+      <ExploreCards />
+    </ScrollView>
   );
 };
 
-export default Home;
+const getStyles = (theme: any) =>
+  StyleSheet.create({
+    scroll: {
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 8,
+    },
+  });
+
+export default HomeScreen;
