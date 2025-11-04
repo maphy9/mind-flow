@@ -12,14 +12,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import DailyWellness from "@/components/main/Daily-wellness/DailyWellness";
 import TestPromptModal from "@/components/main/TestPromptModal";
-
-const getLocalImage = (name: string) => {
-  const table: Record<string, any> = {
-    map: require("@/assets/images/map.png"),
-    mindbot: require("@/assets/images/mindbot.png"),
-  };
-  return table[name] ?? table["map"];
-};
+import mapImage from "@/assets/images/map.png";
+import mindbotImage from "@/assets/images/mindbot.png";
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -82,7 +76,9 @@ const HomeScreen = () => {
       />
 
       {/* Header */}
-      <Text style={[styles.header, { color: theme.secondary }]}>Home Screen</Text>
+      <Text style={[styles.header, { color: theme.secondary }]}>
+        Home Screen
+      </Text>
 
       {/* Daily Wellness (підключений компонент) */}
       <DailyWellness
@@ -92,21 +88,23 @@ const HomeScreen = () => {
       />
 
       {/* Explore */}
-      <Text style={[styles.sectionTitle, { color: theme.secondary, marginTop: 14 }]}>
+      <Text
+        style={[styles.sectionTitle, { color: theme.secondary, marginTop: 14 }]}
+      >
         Explore
       </Text>
 
       <ExploreCard
         title="Relaxation spots map"
         subtitle="Discover calming spots in the city"
-        imageName="map"
+        image={mapImage}
         onPress={() => router.push("/(main)/calm-spots")}
       />
 
       <ExploreCard
         title="Chat with MindBot"
         subtitle="Get personalized support and guidance"
-        imageName="mindbot"
+        image={mindbotImage}
         onPress={() => router.push("/(main)/mind-bot")}
       />
 
@@ -115,14 +113,7 @@ const HomeScreen = () => {
   );
 };
 
-type ExploreCardProps = {
-  title: string;
-  subtitle: string;
-  imageName: string;
-  onPress: () => void;
-};
-
-const ExploreCard: React.FC<ExploreCardProps> = ({ title, subtitle, imageName, onPress }) => {
+const ExploreCard = ({ title, subtitle, image, onPress }) => {
   const theme = useTheme();
   const styles = getStyles(theme);
   const PREVIEW_SIZE = 100;
@@ -147,7 +138,7 @@ const ExploreCard: React.FC<ExploreCardProps> = ({ title, subtitle, imageName, o
         </View>
 
         <Image
-          source={getLocalImage(imageName)}
+          source={image}
           resizeMode="cover"
           style={[
             styles.thumbImg,
@@ -161,104 +152,105 @@ const ExploreCard: React.FC<ExploreCardProps> = ({ title, subtitle, imageName, o
   );
 };
 
-const getStyles = (theme) => StyleSheet.create({
-  scroll: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "700",
-    alignSelf: "center",
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 10,
-  },
-  cardShadow: {
-    marginTop: 12,
-    borderRadius: 20,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOpacity: 0.15,
-        shadowRadius: 14,
-        shadowOffset: { width: 0, height: 8 },
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-    backgroundColor: "transparent",
-  },
-  exploreCard: {
-    width: "100%",
-    borderRadius: 20,
-    backgroundColor: theme.primary,
-    padding: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 3 },
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-    borderWidth: 1,
-    borderColor: theme.primaryAccent,
-  },
-  exploreTextCol: {
-    flex: 1,
-    paddingRight: 14,
-  },
-  exploreTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: theme.secondary,
-    marginBottom: 4,
-  },
-  exploreSubtitle: {
-    fontSize: 13,
-    color: theme.secondaryAccent,
-    marginBottom: 12,
-  },
-  viewBtn: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    backgroundColor: theme.surface,
-    borderRadius: 28,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 2 },
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  viewBtnText: {
-    color: theme.secondary,
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  thumbImg: {
-    borderWidth: 0.8,
-    borderColor: theme.primaryAccent,
-    backgroundColor: theme.surfaceAccent,
-  },
-});
+const getStyles = (theme) =>
+  StyleSheet.create({
+    scroll: {
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 8,
+    },
+    header: {
+      fontSize: 22,
+      fontWeight: "700",
+      alignSelf: "center",
+      marginBottom: 8,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      marginBottom: 10,
+    },
+    cardShadow: {
+      marginTop: 12,
+      borderRadius: 20,
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOpacity: 0.15,
+          shadowRadius: 14,
+          shadowOffset: { width: 0, height: 8 },
+        },
+        android: {
+          elevation: 8,
+        },
+      }),
+      backgroundColor: "transparent",
+    },
+    exploreCard: {
+      width: "100%",
+      borderRadius: 20,
+      backgroundColor: theme.primary,
+      padding: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 3 },
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
+      borderWidth: 1,
+      borderColor: theme.primaryAccent,
+    },
+    exploreTextCol: {
+      flex: 1,
+      paddingRight: 14,
+    },
+    exploreTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.secondary,
+      marginBottom: 4,
+    },
+    exploreSubtitle: {
+      fontSize: 13,
+      color: theme.secondaryAccent,
+      marginBottom: 12,
+    },
+    viewBtn: {
+      alignSelf: "flex-start",
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      backgroundColor: theme.surface,
+      borderRadius: 28,
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOpacity: 0.08,
+          shadowRadius: 6,
+          shadowOffset: { width: 0, height: 2 },
+        },
+        android: {
+          elevation: 2,
+        },
+      }),
+    },
+    viewBtnText: {
+      color: theme.secondary,
+      fontWeight: "700",
+      fontSize: 16,
+    },
+    thumbImg: {
+      borderWidth: 0.8,
+      borderColor: theme.primaryAccent,
+      backgroundColor: theme.surfaceAccent,
+    },
+  });
 
 export default HomeScreen;
