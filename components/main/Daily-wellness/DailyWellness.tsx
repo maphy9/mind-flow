@@ -1,158 +1,54 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Platform,
-  useWindowDimensions,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 
-export type DailyWellnessProps = {
-  streakDays: number;
-  chillScore: number;
-  onStatsPress: () => void;
-
-  /** РУЧКИ ДЛЯ ВИРІВНЮВАННЯ (у px, додатне значення зсуває вниз) */
-  streakUnitOffsetY?: number; // зсув для "days"
-  scoreUnitOffsetY?: number; // зсув для "score"
-  streakNumberOffsetY?: number; // зсув для великої цифри зліва
-  scoreNumberOffsetY?: number; // зсув для великої цифри справа
-};
-
-const DailyWellness = ({
-  streakDays,
-  chillScore,
-  onStatsPress,
-  streakUnitOffsetY = -7,
-  scoreUnitOffsetY = -1,
-  streakNumberOffsetY = 0,
-  scoreNumberOffsetY = 6,
-}) => {
-  const { width } = useWindowDimensions();
+const DailyWellness = () => {
+  const router = useRouter();
   const theme = useTheme();
   const styles = getStyles(theme);
-  const isSmall = width < 380;
 
-  const S = {
-    tileHeight: isSmall ? 152 : 160,
-    titleSize: isSmall ? 16 : 18,
-    numberSize: isSmall ? 56 : 64,
-    unitSize: isSmall ? 18 : 20,
-  };
-
-  // Базова iOS-корекція (можеш міняти глобально тут)
-  const IOS_BASELINE_TWEAK = -2;
+  const [streakDays] = useState(7);
+  const [chillScore] = useState(82);
 
   return (
     <>
       <Text style={styles.sectionTitle}>Daily Wellness</Text>
 
       <View style={styles.row}>
-        {/* Left tile: Streak */}
-        <View style={[styles.tile, { height: S.tileHeight }]}>
-          <Text
-            style={[styles.tileTitle, { fontSize: S.titleSize }]}
-            numberOfLines={2}
-          >
+        <View style={styles.tile}>
+          <Text style={styles.tileTitle} numberOfLines={2}>
             Your current streak
           </Text>
 
-          <View style={[styles.centerRow, { marginTop: -20 }]}>
-            <Text
-              style={[
-                styles.number,
-                {
-                  fontSize: S.numberSize,
-                  lineHeight: S.numberSize,
-                  transform: [{ translateY: streakNumberOffsetY }],
-                },
-              ]}
-            >
-              {streakDays}
-            </Text>
-
-            <Text
-              style={[
-                styles.unit,
-                {
-                  fontSize: S.unitSize,
-                  lineHeight: S.unitSize,
-                  transform: [
-                    {
-                      translateY:
-                        (Platform.OS === "ios" ? IOS_BASELINE_TWEAK : 0) +
-                        streakUnitOffsetY,
-                    },
-                  ],
-                },
-              ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              days
-            </Text>
+          <View style={styles.centerRow}>
+            <Text style={styles.number}>{streakDays}</Text>
+            <Text style={styles.unit}>days</Text>
           </View>
-
-          <View style={{ height: 6 }} />
         </View>
 
-        {/* Right tile: Overall rating */}
-        <View style={[styles.tile, { height: S.tileHeight }]}>
-          <Text
-            style={[styles.tileTitle, { fontSize: S.titleSize }]}
-            numberOfLines={2}
-          >
+        <View style={styles.tile}>
+          <Text style={styles.tileTitle} numberOfLines={2}>
             Overall rating
           </Text>
 
           <View style={styles.centerRow}>
-            <Text
-              style={[
-                styles.number,
-                {
-                  fontSize: S.numberSize,
-                  lineHeight: S.numberSize,
-                  transform: [{ translateY: scoreNumberOffsetY }],
-                },
-              ]}
-            >
-              {chillScore}
-            </Text>
-
-            <Text
-              style={[
-                styles.unit,
-                {
-                  fontSize: S.unitSize,
-                  lineHeight: S.unitSize,
-                  transform: [
-                    {
-                      translateY:
-                        (Platform.OS === "ios" ? IOS_BASELINE_TWEAK : 0) +
-                        scoreUnitOffsetY,
-                    },
-                  ],
-                },
-              ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              score
-            </Text>
+            <Text style={styles.number}>{chillScore}</Text>
+            <Text style={styles.unit}>score</Text>
           </View>
 
           <TouchableOpacity
-            onPress={onStatsPress}
+            onPress={() => router.push("/(main)/settings")}
             activeOpacity={0.85}
             style={styles.linkContainer}
           >
-            <Text
-              style={styles.linkText}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
+            <Text style={styles.linkText}>
               <Text style={styles.linkUnderline}>See more statistics</Text> ›
             </Text>
           </TouchableOpacity>
@@ -178,11 +74,10 @@ const getStyles = (theme) =>
       flex: 1,
       backgroundColor: theme.surface,
       borderRadius: 24,
-      paddingLeft: 18,
-      paddingTop: 16,
-      paddingBottom: 12,
-      paddingRight: 18,
+      paddingHorizontal: 18,
+      paddingVertical: 16,
       justifyContent: "space-between",
+      minHeight: 160,
       ...Platform.select({
         ios: {
           shadowColor: "#000",
@@ -194,32 +89,33 @@ const getStyles = (theme) =>
       }),
     },
     tileTitle: {
+      fontSize: 18,
       fontWeight: "700",
       color: theme.secondary,
-      marginBottom: 6,
-      flexShrink: 1,
+      marginBottom: 8,
     },
     centerRow: {
       flexDirection: "row",
-      alignItems: "flex-end", // базове вирівнювання по нижньому краю
-      columnGap: 10,
+      alignItems: "baseline",
+      columnGap: 8,
+      marginVertical: 8,
     },
     number: {
+      fontSize: 64,
+      lineHeight: 64,
       fontWeight: "800",
       color: theme.secondary,
       letterSpacing: -0.5,
-      includeFontPadding: false, // Android: прибирає зайві поля шрифту
     },
     unit: {
+      fontSize: 20,
+      lineHeight: 20,
       fontWeight: "700",
       color: theme.secondary,
-      flexShrink: 1,
-      includeFontPadding: false, // Android: прибирає зайві поля шрифту
     },
     linkContainer: {
       alignSelf: "flex-start",
-      maxWidth: "100%",
-      paddingRight: 4,
+      marginTop: 8,
     },
     linkText: {
       fontSize: 16,

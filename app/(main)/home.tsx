@@ -8,7 +8,7 @@ import {
   Pressable,
   Platform,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import DailyWellness from "@/components/main/Daily-wellness/DailyWellness";
 import TestPromptModal from "@/components/main/TestPromptModal";
@@ -17,23 +17,11 @@ import mindbotImage from "@/assets/images/mindbot.png";
 
 const HomeScreen = () => {
   const router = useRouter();
-  const params = useLocalSearchParams<{ newChillScore?: string }>();
   const theme = useTheme();
   const styles = getStyles(theme);
 
-  const [streakDays, setStreakDays] = useState(7);
-  const [chillScore, setChillScore] = useState(82);
   const [modalVisible, setModalVisible] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (params.newChillScore) {
-      const score = Math.round(parseFloat(params.newChillScore));
-      if (!isNaN(score)) {
-        setChillScore(score);
-      }
-    }
-  }, [params.newChillScore]);
 
   const resetTimer = () => {
     if (timerRef.current) {
@@ -41,7 +29,7 @@ const HomeScreen = () => {
     }
     timerRef.current = setTimeout(() => {
       setModalVisible(true);
-    }, 60000); // 1 minute
+    }, 60000);
   };
 
   useEffect(() => {
@@ -75,18 +63,10 @@ const HomeScreen = () => {
         onStart={handleStartTest}
       />
 
-      <DailyWellness
-        streakDays={streakDays}
-        chillScore={chillScore}
-        onStatsPress={() => router.push("/(main)/settings")}
-      />
+      <DailyWellness />
 
-      <View
-        style={{
-          paddingVertical: 24,
-        }}
-      >
-        <Text style={[styles.sectionTitle]}>Explore</Text>
+      <View style={{ paddingVertical: 24 }}>
+        <Text style={styles.sectionTitle}>Explore</Text>
 
         <ExploreCard
           title="Relaxation spots map"
@@ -151,12 +131,6 @@ const getStyles = (theme) =>
       paddingHorizontal: 16,
       paddingTop: 12,
       paddingBottom: 8,
-    },
-    header: {
-      fontSize: 22,
-      fontWeight: "700",
-      alignSelf: "center",
-      marginBottom: 8,
     },
     sectionTitle: {
       fontSize: 22,

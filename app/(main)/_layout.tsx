@@ -1,4 +1,3 @@
-
 import { Tabs } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
