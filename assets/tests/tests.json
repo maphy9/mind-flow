@@ -1,0 +1,317 @@
+{
+  "id": "mental-health-20",
+  "title": "Mental Health Screening (PHQ-9, De Jong Gierveld-6, CBI-5)",
+  "language": "en",
+  "version": "1.0.0",
+  "domains": ["depression", "loneliness", "burnout"],
+  "meta": {
+    "notes": "This is a screening, not a diagnosis. If item PHQ-9 #9 > 0, show a safety card and local help resources.",
+    "sources": {
+      "phq9": "Patient Health Questionnaire-9 (PHQ-9)",
+      "djg6": "De Jong Gierveld 6-item Loneliness Scale",
+      "cbi": "Copenhagen Burnout Inventory"
+    }
+  },
+  "questions": [
+    {
+      "id": "phq9_q1",
+      "domain": "depression",
+      "text": "Over the last 2 weeks, how often have you been bothered by the following problem: Little interest or pleasure in doing things?",
+      "options": [
+        { "label": "Not at all", "value": 0 },
+        { "label": "Several days", "value": 1 },
+        { "label": "More than half the days", "value": 2 },
+        { "label": "Nearly every day", "value": 3 }
+      ]
+    },
+    {
+      "id": "phq9_q2",
+      "domain": "depression",
+      "text": "Feeling down, depressed, or hopeless?",
+      "options": [
+        { "label": "Not at all", "value": 0 },
+        { "label": "Several days", "value": 1 },
+        { "label": "More than half the days", "value": 2 },
+        { "label": "Nearly every day", "value": 3 }
+      ]
+    },
+    {
+      "id": "phq9_q3",
+      "domain": "depression",
+      "text": "Trouble falling or staying asleep, or sleeping too much?",
+      "options": [
+        { "label": "Not at all", "value": 0 },
+        { "label": "Several days", "value": 1 },
+        { "label": "More than half the days", "value": 2 },
+        { "label": "Nearly every day", "value": 3 }
+      ]
+    },
+    {
+      "id": "phq9_q4",
+      "domain": "depression",
+      "text": "Feeling tired or having little energy?",
+      "options": [
+        { "label": "Not at all", "value": 0 },
+        { "label": "Several days", "value": 1 },
+        { "label": "More than half the days", "value": 2 },
+        { "label": "Nearly every day", "value": 3 }
+      ]
+    },
+    {
+      "id": "phq9_q5",
+      "domain": "depression",
+      "text": "Poor appetite or overeating?",
+      "options": [
+        { "label": "Not at all", "value": 0 },
+        { "label": "Several days", "value": 1 },
+        { "label": "More than half the days", "value": 2 },
+        { "label": "Nearly every day", "value": 3 }
+      ]
+    },
+    {
+      "id": "phq9_q6",
+      "domain": "depression",
+      "text": "Feeling bad about yourself — or that you are a failure or have let yourself or your family down?",
+      "options": [
+        { "label": "Not at all", "value": 0 },
+        { "label": "Several days", "value": 1 },
+        { "label": "More than half the days", "value": 2 },
+        { "label": "Nearly every day", "value": 3 }
+      ]
+    },
+    {
+      "id": "phq9_q7",
+      "domain": "depression",
+      "text": "Trouble concentrating on things, such as reading or watching television?",
+      "options": [
+        { "label": "Not at all", "value": 0 },
+        { "label": "Several days", "value": 1 },
+        { "label": "More than half the days", "value": 2 },
+        { "label": "Nearly every day", "value": 3 }
+      ]
+    },
+    {
+      "id": "phq9_q8",
+      "domain": "depression",
+      "text": "Moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual?",
+      "options": [
+        { "label": "Not at all", "value": 0 },
+        { "label": "Several days", "value": 1 },
+        { "label": "More than half the days", "value": 2 },
+        { "label": "Nearly every day", "value": 3 }
+      ]
+    },
+    {
+      "id": "phq9_q9",
+      "domain": "depression",
+      "critical": true,
+      "text": "Thoughts that you would be better off dead, or thoughts of hurting yourself in some way?",
+      "options": [
+        { "label": "Not at all", "value": 0 },
+        { "label": "Several days", "value": 1 },
+        { "label": "More than half the days", "value": 2 },
+        { "label": "Nearly every day", "value": 3 }
+      ]
+    },
+
+    {
+      "id": "djg6_q1",
+      "domain": "loneliness",
+      "text": "I experience a general sense of emptiness.",
+      "options": [
+        { "label": "Yes", "value": 1 },
+        { "label": "More or less", "value": 1 },
+        { "label": "No", "value": 0 }
+      ],
+      "polarity": "negative"
+    },
+    {
+      "id": "djg6_q2",
+      "domain": "loneliness",
+      "text": "I miss having people around me.",
+      "options": [
+        { "label": "Yes", "value": 1 },
+        { "label": "More or less", "value": 1 },
+        { "label": "No", "value": 0 }
+      ],
+      "polarity": "negative"
+    },
+    {
+      "id": "djg6_q3",
+      "domain": "loneliness",
+      "text": "I often feel rejected.",
+      "options": [
+        { "label": "Yes", "value": 1 },
+        { "label": "More or less", "value": 1 },
+        { "label": "No", "value": 0 }
+      ],
+      "polarity": "negative"
+    },
+    {
+      "id": "djg6_q4",
+      "domain": "loneliness",
+      "text": "There are plenty of people I can rely on when I have problems.",
+      "options": [
+        { "label": "Yes", "value": 0 },
+        { "label": "More or less", "value": 1 },
+        { "label": "No", "value": 1 }
+      ],
+      "polarity": "positive"
+    },
+    {
+      "id": "djg6_q5",
+      "domain": "loneliness",
+      "text": "There are many people I can trust completely.",
+      "options": [
+        { "label": "Yes", "value": 0 },
+        { "label": "More or less", "value": 1 },
+        { "label": "No", "value": 1 }
+      ],
+      "polarity": "positive"
+    },
+    {
+      "id": "djg6_q6",
+      "domain": "loneliness",
+      "text": "There are enough people I feel close to.",
+      "options": [
+        { "label": "Yes", "value": 0 },
+        { "label": "More or less", "value": 1 },
+        { "label": "No", "value": 1 }
+      ],
+      "polarity": "positive"
+    },
+
+    {
+      "id": "cbi_q1",
+      "domain": "burnout",
+      "text": "How often do you feel tired?",
+      "options": [
+        { "label": "Never/almost never", "value": 0 },
+        { "label": "Seldom", "value": 25 },
+        { "label": "Sometimes", "value": 50 },
+        { "label": "Often", "value": 75 },
+        { "label": "Always", "value": 100 }
+      ]
+    },
+    {
+      "id": "cbi_q2",
+      "domain": "burnout",
+      "text": "How often are you physically exhausted?",
+      "options": [
+        { "label": "Never/almost never", "value": 0 },
+        { "label": "Seldom", "value": 25 },
+        { "label": "Sometimes", "value": 50 },
+        { "label": "Often", "value": 75 },
+        { "label": "Always", "value": 100 }
+      ]
+    },
+    {
+      "id": "cbi_q3",
+      "domain": "burnout",
+      "text": "How often are you emotionally exhausted?",
+      "options": [
+        { "label": "Never/almost never", "value": 0 },
+        { "label": "Seldom", "value": 25 },
+        { "label": "Sometimes", "value": 50 },
+        { "label": "Often", "value": 75 },
+        { "label": "Always", "value": 100 }
+      ]
+    },
+    {
+      "id": "cbi_q4",
+      "domain": "burnout",
+      "text": "How often do you think: “I can’t take it anymore”?",
+      "options": [
+        { "label": "Never/almost never", "value": 0 },
+        { "label": "Seldom", "value": 25 },
+        { "label": "Sometimes", "value": 50 },
+        { "label": "Often", "value": 75 },
+        { "label": "Always", "value": 100 }
+      ]
+    },
+    {
+      "id": "cbi_q5",
+      "domain": "burnout",
+      "text": "How often do you feel worn out?",
+      "options": [
+        { "label": "Never/almost never", "value": 0 },
+        { "label": "Seldom", "value": 25 },
+        { "label": "Sometimes", "value": 50 },
+        { "label": "Often", "value": 75 },
+        { "label": "Always", "value": 100 }
+      ]
+    }
+  ],
+  "scoring": {
+    "depression": {
+      "items": ["phq9_q1","phq9_q2","phq9_q3","phq9_q4","phq9_q5","phq9_q6","phq9_q7","phq9_q8","phq9_q9"],
+      "method": "sum",
+      "range": [0,27],
+      "severity": [
+        { "min": 0, "max": 4, "label": "Minimal symptoms" },
+        { "min": 5, "max": 9, "label": "Mild depression" },
+        { "min": 10, "max": 14, "label": "Moderate depression" },
+        { "min": 15, "max": 19, "label": "Moderately severe depression" },
+        { "min": 20, "max": 27, "label": "Severe depression" }
+      ],
+      "safety_rule": {
+        "if_item": "phq9_q9",
+        "if_value_ge": 1,
+        "action": "show_safety_message"
+      }
+    },
+    "loneliness": {
+      "items": ["djg6_q1","djg6_q2","djg6_q3","djg6_q4","djg6_q5","djg6_q6"],
+      "method": "sum",
+      "range": [0,6],
+      "severity": [
+        { "min": 0, "max": 1, "label": "Low loneliness" },
+        { "min": 2, "max": 4, "label": "Moderate loneliness" },
+        { "min": 5, "max": 6, "label": "High loneliness" }
+      ],
+      "polarity_note": "Items 1–3 negative; Items 4–6 positive (reverse-keyed per standard DJG-6 scoring)."
+    },
+    "burnout": {
+      "items": ["cbi_q1","cbi_q2","cbi_q3","cbi_q4","cbi_q5"],
+      "method": "average",
+      "range": [0,100],
+      "severity": [
+        { "min": 0, "max": 49.9, "label": "Low burnout" },
+        { "min": 50, "max": 74.9, "label": "Moderate burnout" },
+        { "min": 75, "max": 100, "label": "High burnout" }
+      ],
+      "context_hint": "Interpret as personal/work-study exhaustion screening."
+    }
+  },
+  "reporting": {
+    "overall": [
+      {
+        "domain": "depression",
+        "label": "Depression (PHQ-9)",
+        "display": "raw_and_severity"
+      },
+      {
+        "domain": "loneliness",
+        "label": "Loneliness (De Jong Gierveld-6)",
+        "display": "raw_and_severity"
+      },
+      {
+        "domain": "burnout",
+        "label": "Burnout (CBI-5 short)",
+        "display": "percent_and_severity"
+      }
+    ],
+    "recommendations": {
+      "depression": {
+        "moderate_or_higher": "Consider contacting a mental health professional for assessment.",
+        "safety_if_phq9_q9_ge_1": "If you have thoughts of self-harm, seek immediate support from local emergency services or crisis lines."
+      },
+      "loneliness": {
+        "moderate_or_higher": "Consider social support activities or talking to a counselor."
+      },
+      "burnout": {
+        "moderate_or_higher": "Review workload, recovery routines, and seek guidance from a counselor or supervisor/advisor."
+      }
+    }
+  }
+}

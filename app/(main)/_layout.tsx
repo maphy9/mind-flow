@@ -1,11 +1,56 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Notifications from "expo-notifications";
+import {
+  registerNotifications,
+  scheduleDailyNotification,
+} from "@/utils/notifications";
+import { useEffect } from "react";
+import { useAuth } from "@/context/authContext";
 
 export default function TabLayout() {
+  const router = useRouter();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    if (currentUser == null) {
+      return;
+    }
+
+    async function setupNotificationsAndHandleInitialLaunch() {
+      const granted = await registerNotifications();
+      if (granted) {
+        await scheduleDailyNotification();
+      }
+
+      const response = Notifications.getLastNotificationResponse();
+      if (response) {
+        const { url } = response.notification.request.content.data as any;
+        if (url) {
+          const routePath = url.replace(/.*?:\/\//g, "/");
+          router.replace(routePath);
+        }
+      }
+
+      const subscription =
+        Notifications.addNotificationResponseReceivedListener((response) => {
+          const { url } = response.notification.request.content.data as any;
+
+          if (url) {
+            const routePath = url.replace(/.*?:\/\//g, "/");
+            router.push(routePath);
+          }
+        });
+
+      return () => subscription.remove();
+    }
+
+    setupNotificationsAndHandleInitialLaunch();
+  }, []);
 
   return (
     <Tabs
@@ -89,6 +134,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="test"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
