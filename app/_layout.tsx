@@ -9,6 +9,7 @@ import Snackbar from "@/components/general/Snackbar";
 
 const _layout = () => {
   const theme = useTheme();
+
   return (
     <Provider store={store}>
       <AuthProvider>
