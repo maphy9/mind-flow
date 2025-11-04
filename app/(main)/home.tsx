@@ -75,11 +75,6 @@ const HomeScreen = () => {
         onStart={handleStartTest}
       />
 
-      {/* Header */}
-      <Text style={[styles.header, { color: theme.secondary }]}>
-        Home Screen
-      </Text>
-
       {/* Daily Wellness (підключений компонент) */}
       <DailyWellness
         streakDays={streakDays}
