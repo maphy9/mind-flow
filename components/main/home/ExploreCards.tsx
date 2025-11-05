@@ -1,16 +1,10 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Pressable,
-  Platform,
-} from "react-native";
+import { View, StyleSheet, Image, Pressable, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import mapImage from "@/assets/images/map.png";
 import mindbotImage from "@/assets/images/mindbot.png";
+import Text from "@/components/general/Text";
 
 const ExploreCards = () => {
   const router = useRouter();
