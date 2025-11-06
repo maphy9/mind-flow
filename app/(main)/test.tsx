@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { useTheme } from "@/context/themeContext";
 import { useRouter } from "expo-router";
 import { Card } from "react-native-paper";
 import testData from "@/assets/tests/tests.json";
@@ -17,6 +18,8 @@ import firestore from "@react-native-firebase/firestore";
 
 const TestScreen = () => {
   const router = useRouter();
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
@@ -34,7 +37,9 @@ const TestScreen = () => {
   };
 
   // ЗМІНА: робимо асинхронною та додаємо запис у Firestore
-  const calculateAndSaveResults = async (finalAnswers: Record<string, number>) => {
+  const calculateAndSaveResults = async (
+    finalAnswers: Record<string, number>
+  ) => {
     const { depression, loneliness, burnout } = testData.scoring;
 
     // 1. Raw scores
@@ -67,7 +72,9 @@ const TestScreen = () => {
       if (!user) {
         // Якщо користувач не автентифікований — не пишемо під анонімом,
         // а кидаємо чітку помилку (можете замінити на signInAnonymously(), якщо хочете).
-        throw new Error("User is not authenticated. Please sign in to save results.");
+        throw new Error(
+          "User is not authenticated. Please sign in to save results."
+        );
       }
 
       const uid = user.uid;
@@ -87,8 +94,8 @@ const TestScreen = () => {
         .doc(uid)
         .collection("testResults")
         .add({
-          overallRating: overallRatingRounded,   // зберігаємо інт
-          overallRatingRaw: overallRating,       // і сире значення (з плаваючою)
+          overallRating: overallRatingRounded, // зберігаємо інт
+          overallRatingRaw: overallRating, // і сире значення (з плаваючою)
           createdAt: firestore.FieldValue.serverTimestamp(), // серверний час/дата
         });
     } catch (e) {
@@ -135,53 +142,54 @@ const TestScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 16,
-    justifyContent: "center",
-    backgroundColor: "#F5F5F5",
-  },
-  card: {
-    marginBottom: 24,
-    borderRadius: 16,
-    backgroundColor: "#FFFFFF",
-  },
-  progressIndicator: {
-    textAlign: "center",
-    marginBottom: 16,
-    color: "#6B7280",
-    fontWeight: "500",
-  },
-  questionText: {
-    fontSize: 18,
-    textAlign: "center",
-    lineHeight: 26,
-    color: "#111827",
-  },
-  optionsContainer: {
-    marginTop: 16,
-  },
-  optionButton: {
-    backgroundColor: "#FFFFFF",
-    paddingVertical: 18,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  optionText: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#374151",
-    fontWeight: "500",
-  },
-});
+const getStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      padding: 16,
+      justifyContent: "center",
+      backgroundColor: theme.primaryAccent,
+    },
+    card: {
+      marginBottom: 24,
+      borderRadius: 16,
+      backgroundColor: theme.primary,
+    },
+    progressIndicator: {
+      textAlign: "center",
+      marginBottom: 16,
+      color: theme.secondaryAccent,
+      fontWeight: "500",
+    },
+    questionText: {
+      fontSize: 18,
+      textAlign: "center",
+      lineHeight: 26,
+      color: theme.secondary,
+    },
+    optionsContainer: {
+      marginTop: 16,
+    },
+    optionButton: {
+      backgroundColor: theme.primary,
+      paddingVertical: 18,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.primaryAccent,
+      shadowColor: "#000",
+      shadowOpacity: 0.05,
+      shadowRadius: 5,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
+    },
+    optionText: {
+      fontSize: 16,
+      textAlign: "center",
+      color: theme.secondary,
+      fontWeight: "500",
+    },
+  });
 
 export default TestScreen;

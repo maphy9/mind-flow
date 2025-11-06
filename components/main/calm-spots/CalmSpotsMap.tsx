@@ -1,6 +1,6 @@
 import Text from "@/components/general/Text";
 import { DEFAULT_LOCATION } from "@/constants/location";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { LeafletView } from "react-native-leaflet-view";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -12,7 +12,7 @@ import { showAlert } from "@/redux/states/alerts";
 import { CalmSpot } from "@/types/calmSpot";
 
 const CalmSpotsMap = () => {
-  const theme = useTheme();
+  const { theme } = useTheme();
   const { location } = useLocation();
   const {
     calmSpots,

@@ -1,4 +1,4 @@
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
 import React from "react";
 import { Image, ImageBackground, StyleSheet, View } from "react-native";
 import Text from "../general/Text";
@@ -6,10 +6,10 @@ import logo from "@/assets/images/vector-logo.png";
 import logoBoxDark from "@/assets/images/logo-box-dark.png";
 import logoBoxLight from "@/assets/images/logo-box-light.png";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "@/constants/colors";
+import { COLORS } from "@/constants/colors";
 
 const Header = () => {
-  const theme = useTheme();
+  const { theme } = useTheme();
   const styles = StyleSheet.create({
     logoBox: {
       paddingTop: 8,
@@ -34,7 +34,7 @@ const Header = () => {
 
   return (
     <ImageBackground
-      source={theme === Colors.dark ? logoBoxDark : logoBoxLight}
+      source={theme === COLORS.dark ? logoBoxDark : logoBoxLight}
       resizeMode="stretch"
     >
       <SafeAreaView style={styles.logoBox}>

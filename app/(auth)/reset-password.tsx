@@ -4,14 +4,14 @@ import { useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
 import Text from "@/components/general/Text";
 import TextInput from "@/components/general/TextInput";
 import { useRouter } from "expo-router";
 
 const ResetPassword = () => {
   const router = useRouter();
-  const theme = useTheme();
+  const { theme } = useTheme();
   const { resetPassword } = useAuth();
   const dispatch = useDispatch();
 
