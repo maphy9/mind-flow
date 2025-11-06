@@ -44,7 +44,7 @@ const DailyWellness = () => {
           </View>
 
           <TouchableOpacity
-            onPress={() => router.push("/(main)/settings")}
+            onPress={() => router.push("/(main)/tables")}
             activeOpacity={0.85}
             style={styles.linkContainer}
           >

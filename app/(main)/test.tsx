@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   View,
@@ -6,16 +5,18 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Card } from "react-native-paper";
 import testData from "@/assets/tests/tests.json";
-import { useTheme } from "@/hooks/useTheme";
+
+// ДОДАНО: імпорти Firebase Auth/Firestore
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
 
 const TestScreen = () => {
   const router = useRouter();
-  const theme = useTheme();
-  const styles = getStyles(theme);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
@@ -26,13 +27,17 @@ const TestScreen = () => {
     if (currentQuestionIndex < testData.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      calculateAndSaveResults(newAnswers);
+      // Коли тест завершено — рахуємо і зберігаємо результати
+      // Виклик асинхронної функції без очікування (дозволяє не міняти сигнатуру)
+      void calculateAndSaveResults(newAnswers);
     }
   };
 
-  const calculateAndSaveResults = (finalAnswers: Record<string, number>) => {
+  // ЗМІНА: робимо асинхронною та додаємо запис у Firestore
+  const calculateAndSaveResults = async (finalAnswers: Record<string, number>) => {
     const { depression, loneliness, burnout } = testData.scoring;
 
+    // 1. Raw scores
     const depScore = depression.items.reduce(
       (acc, id) => acc + (finalAnswers[id] || 0),
       0
@@ -47,15 +52,58 @@ const TestScreen = () => {
     );
     const boScore = boTotal / burnout.items.length;
 
+    // 2. Normalization (0-1, higher is better)
     const depNorm = 1 - depScore / 27;
     const lonNorm = 1 - lonScore / 6;
     const boNorm = 1 - boScore / 100;
 
+    // 3. Weighted average
     const overallRating = (depNorm * 0.4 + lonNorm * 0.3 + boNorm * 0.3) * 100;
+    const overallRatingRounded = Math.round(overallRating);
 
+    // 4. ЗАПИС У FIRESTORE під поточним користувачем
+    try {
+      const user = auth().currentUser;
+      if (!user) {
+        // Якщо користувач не автентифікований — не пишемо під анонімом,
+        // а кидаємо чітку помилку (можете замінити на signInAnonymously(), якщо хочете).
+        throw new Error("User is not authenticated. Please sign in to save results.");
+      }
+
+      const uid = user.uid;
+
+      // Опційно: оновимо профіль користувача часовою міткою (merge, щоб не перетерти інші поля)
+      await firestore()
+        .collection("users")
+        .doc(uid)
+        .set(
+          { lastUpdatedAt: firestore.FieldValue.serverTimestamp() },
+          { merge: true }
+        );
+
+      // Основний запис результату у підколекцію testResults
+      await firestore()
+        .collection("users")
+        .doc(uid)
+        .collection("testResults")
+        .add({
+          overallRating: overallRatingRounded,   // зберігаємо інт
+          overallRatingRaw: overallRating,       // і сире значення (з плаваючою)
+          createdAt: firestore.FieldValue.serverTimestamp(), // серверний час/дата
+        });
+    } catch (e) {
+      console.error("Failed to save overallRating:", e);
+      Alert.alert(
+        "Saving error",
+        e instanceof Error ? e.message : "Failed to save the test result."
+      );
+      // Продовжуємо навігацію навіть якщо запис не вдався — за бажанням можна змінити
+    }
+
+    // 5. Навігація назад на home з новим score
     router.replace({
       pathname: "/(main)/home",
-      params: { newChillScore: overallRating.toFixed(0) }, // Round to integer
+      params: { newChillScore: String(overallRatingRounded) }, // ціле число
     });
   };
 
@@ -87,41 +135,41 @@ const TestScreen = () => {
   );
 };
 
-const getStyles = (theme) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
     justifyContent: "center",
-    backgroundColor: theme.primaryAccent,
+    backgroundColor: "#F5F5F5",
   },
   card: {
     marginBottom: 24,
     borderRadius: 16,
-    backgroundColor: theme.primary,
+    backgroundColor: "#FFFFFF",
   },
-   progressIndicator: {
+  progressIndicator: {
     textAlign: "center",
     marginBottom: 16,
-    color: theme.secondaryAccent,
+    color: "#6B7280",
     fontWeight: "500",
   },
   questionText: {
     fontSize: 18,
     textAlign: "center",
     lineHeight: 26,
-    color: theme.secondary,
+    color: "#111827",
   },
   optionsContainer: {
     marginTop: 16,
   },
   optionButton: {
-    backgroundColor: theme.primary,
+    backgroundColor: "#FFFFFF",
     paddingVertical: 18,
     paddingHorizontal: 16,
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: theme.primaryAccent,
+    borderColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 5,
@@ -131,7 +179,7 @@ const getStyles = (theme) => StyleSheet.create({
   optionText: {
     fontSize: 16,
     textAlign: "center",
-    color: theme.secondary,
+    color: "#374151",
     fontWeight: "500",
   },
 });
