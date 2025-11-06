@@ -1,5 +1,5 @@
 import { Tabs, useRouter } from "expo-router";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Notifications from "expo-notifications";
@@ -12,7 +12,7 @@ import { useAuth } from "@/context/authContext";
 
 export default function TabLayout() {
   const router = useRouter();
-  const theme = useTheme();
+  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { currentUser } = useAuth();
 
@@ -130,10 +130,17 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
+          headerShown: false,
           title: "Settings",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="(settings)"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen

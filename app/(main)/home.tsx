@@ -1,11 +1,11 @@
 import React from "react";
 import { StyleSheet, ScrollView } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
 import DailyWellness from "@/components/main/home/DailyWellness";
 import ExploreCards from "@/components/main/home/ExploreCards";
 
 const HomeScreen = () => {
-  const theme = useTheme();
+  const { theme } = useTheme();
   const styles = getStyles(theme);
 
   return (

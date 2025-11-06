@@ -1,17 +1,12 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
+import Text from "@/components/general/Text";
 
 const DailyWellness = () => {
   const router = useRouter();
-  const theme = useTheme();
+  const { theme } = useTheme();
   const styles = getStyles(theme);
 
   const [streakDays] = useState(7);

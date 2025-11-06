@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import TextInput from "@/components/general/TextInput";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
 import { useAuth } from "@/context/authContext";
 import { useDispatch } from "react-redux";
 import { showAlert } from "@/redux/states/alerts";
@@ -10,7 +10,7 @@ import { useRouter } from "expo-router";
 
 const EmailLogin = () => {
   const router = useRouter();
-  const theme = useTheme();
+  const { theme } = useTheme();
   const { login } = useAuth();
   const dispatch = useDispatch();
 

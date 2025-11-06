@@ -1,31 +1,49 @@
-import { View } from "react-native";
-import React from "react";
-import { Slot } from "expo-router";
-import { useTheme } from "@/hooks/useTheme";
-import { AuthProvider } from "@/context/authContext";
+import { useColorScheme, View } from "react-native";
+import React, { useEffect } from "react";
+import { router, Slot, useRouter } from "expo-router";
+import { AuthProvider, useAuth } from "@/context/authContext";
 import { Provider } from "react-redux";
 import { store } from "@/redux/store";
 import Snackbar from "@/components/general/Snackbar";
+import { ThemeProvider, useTheme } from "@/context/themeContext";
 
 const _layout = () => {
-  const theme = useTheme();
-
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: theme.primary,
-          }}
-        >
-          <Slot />
-
-          <Snackbar />
-        </View>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ThemedLayout />
+        </AuthProvider>
+      </ThemeProvider>
     </Provider>
   );
 };
 
+const ThemedLayout = () => {
+  const { theme, loadThemePreference } = useTheme();
+  const systemColorScheme = useColorScheme();
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    loadThemePreference();
+  }, [systemColorScheme]);
+
+  useEffect(() => {
+    if (currentUser === null) {
+      router.push("/(auth)/login");
+    }
+  }, [currentUser]);
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.primary,
+      }}
+    >
+      <Slot />
+      <Snackbar />
+    </View>
+  );
+};
 export default _layout;

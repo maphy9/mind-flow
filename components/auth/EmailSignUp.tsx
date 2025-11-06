@@ -1,5 +1,5 @@
 import { useAuth } from "@/context/authContext";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
 import { showAlert } from "@/redux/states/alerts";
 import { useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -11,7 +11,7 @@ import { useRouter } from "expo-router";
 
 const EmailSignUp = () => {
   const router = useRouter();
-  const theme = useTheme();
+  const { theme } = useTheme();
   const { signUp } = useAuth();
   const dispatch = useDispatch();
 

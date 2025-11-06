@@ -1,10 +1,10 @@
 import { StyleSheet, TextInput as _TextInput } from "react-native";
 import React from "react";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
 import { hexToRgba } from "@/utils/colors";
 
 const TextInput = ({ style = {}, ...props }) => {
-  const theme = useTheme();
+  const { theme } = useTheme();
   const styles = StyleSheet.create({
     textInput: {
       fontFamily: "Lato",

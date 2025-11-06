@@ -4,7 +4,7 @@ import { RootState } from "@/redux/store";
 import { Snackbar as _Snackbar } from "react-native-paper";
 import { removeAlert } from "@/redux/states/alerts";
 import { StyleSheet } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/context/themeContext";
 import Text from "./Text";
 
 const Snackbar = () => {
@@ -13,7 +13,7 @@ const Snackbar = () => {
   const onDismissSnackBar = () => {
     dispatch(removeAlert());
   };
-  const theme = useTheme();
+  const { theme } = useTheme();
 
   const backgroundColor =
     alerts[0]?.type === "info" ? theme.surface : theme.red;
