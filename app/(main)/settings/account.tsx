@@ -4,6 +4,7 @@ import { useTheme } from "@/context/themeContext";
 import Text from "@/components/general/Text";
 import { useAuth } from "@/context/authContext";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 const InfoRow = ({ label, value, theme }) => {
   const styles = getStyles(theme);
@@ -17,7 +18,7 @@ const InfoRow = ({ label, value, theme }) => {
 
 const AccountScreen = () => {
   const { theme } = useTheme();
-  const { currentUser } = useAuth();
+  const { currentUser, signOut } = useAuth();
   const styles = getStyles(theme);
 
   return (
@@ -38,8 +39,9 @@ const AccountScreen = () => {
       <TouchableOpacity
         style={styles.signOutButton}
         activeOpacity={0.7}
-        onPress={() => {
-          console.log("Sign Out Pressed");
+        onPress={async () => {
+          router.push("/(auth)/login");
+          await signOut();
         }}
       >
         <Ionicons name="log-out-outline" size={22} color="#E53E3E" />

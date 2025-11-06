@@ -1,7 +1,7 @@
 import { useColorScheme, View } from "react-native";
 import React, { useEffect } from "react";
-import { Slot } from "expo-router";
-import { AuthProvider } from "@/context/authContext";
+import { router, Slot, useRouter } from "expo-router";
+import { AuthProvider, useAuth } from "@/context/authContext";
 import { Provider } from "react-redux";
 import { store } from "@/redux/store";
 import Snackbar from "@/components/general/Snackbar";
@@ -22,10 +22,17 @@ const _layout = () => {
 const ThemedLayout = () => {
   const { theme, loadThemePreference } = useTheme();
   const systemColorScheme = useColorScheme();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     loadThemePreference();
   }, [systemColorScheme]);
+
+  useEffect(() => {
+    if (currentUser === null) {
+      router.push("/(auth)/login");
+    }
+  }, [currentUser]);
 
   return (
     <View
