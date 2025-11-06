@@ -24,6 +24,7 @@ const Settings = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [themeMode, setThemeMode] = useState("system");
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showClearCacheModal, setShowClearCacheModal] = useState(false);
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -66,6 +67,7 @@ const Settings = () => {
         );
       } else {
         setThemeMode("system");
+        setTheme(systemColorScheme);
       }
     } catch (error) {
       console.error("Error loading theme mode:", error);
@@ -115,6 +117,20 @@ const Settings = () => {
     } catch (error) {
       console.error("Error toggling notifications:", error);
     }
+  };
+
+  const handleClearCache = () => {
+    setShowClearCacheModal(true);
+  };
+
+  const confirmClearCache = async () => {
+    try {
+      await AsyncStorage.clear();
+      await loadThemeMode();
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+    }
+    setShowClearCacheModal(false);
   };
 
   const getThemeDisplayText = () => {
@@ -353,7 +369,7 @@ const Settings = () => {
         <TouchableOpacity
           style={styles.preferenceItem}
           activeOpacity={0.7}
-          onPress={() => {}}
+          onPress={handleClearCache}
         >
           <View style={styles.preferenceIcon}>
             <Ionicons name="trash-outline" size={24} color={theme.secondary} />
@@ -448,6 +464,57 @@ const Settings = () => {
                   ]}
                 >
                   System
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      )}
+
+      {showClearCacheModal && (
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowClearCacheModal(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Clear Cache</Text>
+              <Text
+                style={[
+                  styles.modalOptionText,
+                  { marginBottom: 20, color: theme.secondaryAccent },
+                ]}
+              >
+                Are you sure you want to clear all app data? This will reset
+                your preferences.
+              </Text>
+
+              <TouchableOpacity
+                style={[styles.modalOption, { backgroundColor: theme.primary }]}
+                onPress={() => setShowClearCacheModal(false)}
+              >
+                <Text
+                  style={[styles.modalOptionText, { color: theme.secondary }]}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalOption, { backgroundColor: "#E53E3E" }]}
+                onPress={confirmClearCache}
+              >
+                <Text
+                  style={[
+                    styles.modalOptionText,
+                    { color: "#FFFFFF", fontWeight: "600" },
+                  ]}
+                >
+                  Clear Cache
                 </Text>
               </TouchableOpacity>
             </View>
