@@ -1,5 +1,12 @@
-import { View, TouchableOpacity, StyleSheet, Image } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Linking,
+  AppState,
+} from "react-native";
+import React, { useEffect, useState, useRef } from "react";
 import { useTheme } from "@/context/themeContext";
 import { Ionicons } from "@expo/vector-icons";
 import Text from "@/components/general/Text";
@@ -17,6 +24,7 @@ const Settings = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [themeMode, setThemeMode] = useState("system");
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const appState = useRef(AppState.currentState);
 
   useEffect(() => {
     if (currentUser.photoURL) {
@@ -27,7 +35,25 @@ const Settings = () => {
   useEffect(() => {
     loadThemeMode();
     loadNotificationPreference();
+
+    const subscription = AppState.addEventListener(
+      "change",
+      _handleAppStateChange
+    );
+    return () => {
+      subscription.remove();
+    };
   }, []);
+
+  const _handleAppStateChange = (nextAppState) => {
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === "active"
+    ) {
+      loadNotificationPreference();
+    }
+    appState.current = nextAppState;
+  };
 
   const loadThemeMode = async () => {
     try {
@@ -78,7 +104,9 @@ const Settings = () => {
         await Notifications.getPermissionsAsync();
 
       if (currentStatus === "granted") {
-        setNotificationsEnabled(false);
+        Linking.openSettings();
+      } else if (currentStatus === "denied") {
+        Linking.openSettings();
       } else {
         const { status: newStatus } =
           await Notifications.requestPermissionsAsync();
