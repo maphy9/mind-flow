@@ -140,8 +140,16 @@ export default function TabLayout() {
         name="test"
         options={{
           href: null,
+          headerShown: false ,
         }}
       />
+      <Tabs.Screen
+              name="tables"
+              options={{
+                href: null,
+                title: "Your Test Results",
+              }}
+            />
     </Tabs>
   );
 }
