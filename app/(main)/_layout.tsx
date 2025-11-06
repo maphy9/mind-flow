@@ -130,10 +130,17 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
+          headerShown: false,
           title: "Settings",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="(settings)"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen

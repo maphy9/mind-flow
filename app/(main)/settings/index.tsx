@@ -15,6 +15,7 @@ import emptyPfp from "@/assets/images/empty-pfp.png";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "react-native";
+import { useRouter } from "expo-router";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
@@ -26,6 +27,7 @@ const Settings = () => {
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showClearCacheModal, setShowClearCacheModal] = useState(false);
   const appState = useRef(AppState.currentState);
+  const router = useRouter();
 
   useEffect(() => {
     if (currentUser.photoURL) {
@@ -281,7 +283,7 @@ const Settings = () => {
       <TouchableOpacity
         style={styles.accountCard}
         activeOpacity={0.7}
-        onPress={() => {}}
+        onPress={() => router.push("/(main)/settings/account")}
       >
         <Image
           source={typeof userPfp === "string" ? { uri: userPfp } : userPfp}
@@ -385,7 +387,7 @@ const Settings = () => {
         <TouchableOpacity
           style={styles.preferenceItem}
           activeOpacity={0.7}
-          onPress={() => {}}
+          onPress={() => router.push("/(main)/settings/about")}
         >
           <View style={styles.preferenceIcon}>
             <Ionicons
