@@ -5,6 +5,7 @@ import {
   requestForegroundPermissionsAsync,
   getCurrentPositionAsync,
 } from "expo-location";
+import { DEFAULT_LOCATION } from "@/constants/location";
 
 export const LocationContext = createContext(null);
 
@@ -13,26 +14,39 @@ export function useLocation() {
 }
 
 export function LocationProvider({ children }) {
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState(DEFAULT_LOCATION);
   const dispatch = useDispatch();
 
   useEffect(() => {
     async function getCurrentLocation() {
-      const { status } = await requestForegroundPermissionsAsync();
-      if (status !== "granted") {
+      try {
+        const { status } = await requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          dispatch(
+            showAlert({
+              text: "Location permission denied. Using default location.",
+              type: "info",
+            })
+          );
+          return;
+        }
+
+        const location = await getCurrentPositionAsync();
+
+        setLocation({
+          lat: location.coords.latitude,
+          lng: location.coords.longitude,
+        });
+      } catch (error) {
+        console.error("Location error:", error);
         dispatch(
           showAlert({
-            text: "Unfortunately, we couldn't access your location",
-            type: "error",
+            text: "Could not get current location. Using default location.",
+            type: "info",
           })
         );
-        return;
+        setLocation(DEFAULT_LOCATION);
       }
-      const location = await getCurrentPositionAsync({});
-      setLocation({
-        lat: location.coords.latitude,
-        lng: location.coords.longitude,
-      });
     }
 
     getCurrentLocation();
