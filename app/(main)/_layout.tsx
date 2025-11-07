@@ -138,25 +138,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="(settings)"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="test"
         options={{
           href: null,
-          headerShown: false ,
+          headerShown: false,
         }}
       />
       <Tabs.Screen
-              name="tables"
-              options={{
-                href: null,
-                title: "Your Test Results",
-              }}
-            />
+        name="tables"
+        options={{
+          href: null,
+          title: "Your Test Results",
+        }}
+      />
     </Tabs>
   );
 }
