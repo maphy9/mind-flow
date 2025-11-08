@@ -29,7 +29,8 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.maphy9.mindflow",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "favicon": "./assets/images/logo-light.png"
