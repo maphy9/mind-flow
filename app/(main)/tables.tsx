@@ -6,23 +6,37 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from "react-native";
-import auth from "@react-native-firebase/auth";
-import firestore from "@react-native-firebase/firestore";
+// FIX: Import modular auth functions
+import { getAuth } from "@react-native-firebase/auth";
+// FIX: Import modular firestore functions
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  getDocs,
+} from "@react-native-firebase/firestore";
 import { BarChart } from "react-native-gifted-charts";
 import { useTheme } from "@/context/themeContext";
+
+// FIX: Initialize Firebase services outside the component
+// This follows the modular pattern and ensures they are singletons.
+const authInstance = getAuth();
+const db = getFirestore();
 
 const Tables = () => {
   const { theme } = useTheme();
   const styles = getStyles(theme);
   const { width } = useWindowDimensions();
-  const [testResults, setTestResults] = useState([]);
+  const [testResults, setTestResults] = useState<any[]>([]); // Changed to any[] to match 'results'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const user = auth().currentUser;
+        // FIX: Use the initialized auth instance
+        const user = authInstance.currentUser;
         if (!user) {
           setError("User not authenticated.");
           setLoading(false);
@@ -31,12 +45,13 @@ const Tables = () => {
 
         const uid = user.uid;
 
-        const snapshot = await firestore()
-          .collection("users")
-          .doc(uid)
-          .collection("testResults")
-          .orderBy("createdAt", "desc")
-          .get();
+        // FIX: Rebuild the query using modular functions
+        // 1. Define the collection reference
+        const testResultsColRef = collection(db, "users", uid, "testResults");
+        // 2. Define the query
+        const q = query(testResultsColRef, orderBy("createdAt", "desc"));
+        // 3. Execute the query
+        const snapshot = await getDocs(q);
 
         const results = snapshot.docs.map((doc) => {
           const data = doc.data() as any;
@@ -62,7 +77,7 @@ const Tables = () => {
     };
 
     fetchResults();
-  }, []);
+  }, []); // We can keep the empty dependency array as authInstance and db are stable
 
   const chartData = useMemo(() => {
     const sorted = [...testResults].sort((a, b) => {
