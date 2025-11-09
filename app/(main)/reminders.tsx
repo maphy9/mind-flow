@@ -16,18 +16,17 @@ import firestore from "@react-native-firebase/firestore";
 
 type Reminder = {
   id: string;
-  title: string;          // e.g. "Drink water"
-  rawTime: string;        // original text from the bot (e.g. "today 18:00", "07:00", "in 10 minutes")
+  title: string;
+  rawTime: string;
   scheduleType: "once" | "daily";
-  hour?: number;          // for daily
-  minute?: number;        // for daily
-  when?: number;          // epoch ms for once
+  hour?: number;
+  minute?: number;
+  when?: number;
   enabled: boolean;
   notificationIds?: string[];
   createdAt?: any;
 };
 
-// Human summary for UI
 const describe = (r: Reminder) => {
   if (r.scheduleType === "daily" && r.hour !== undefined && r.minute !== undefined) {
     const hh = String(r.hour).padStart(2, "0");
@@ -40,7 +39,6 @@ const describe = (r: Reminder) => {
   return r.rawTime || "Custom";
 };
 
-// Ensure permissions
 async function ensureNotifPerms(): Promise<boolean> {
   const { status } = await Notifications.getPermissionsAsync();
   if (status === "granted") return true;
@@ -48,49 +46,29 @@ async function ensureNotifPerms(): Promise<boolean> {
   return req.status === "granted";
 }
 
-// (Re)Schedule one reminder locally; returns array of notification IDs
 async function scheduleReminder(r: Reminder): Promise<string[]> {
   const ok = await ensureNotifPerms();
   if (!ok) return [];
-
   const ids: string[] = [];
-
   if (r.scheduleType === "daily" && r.hour != null && r.minute != null) {
     const id = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: r.title,
-        body: "It's time!",
-        sound: true,
-        priority: Notifications.AndroidNotificationPriority.HIGH,
-      },
-      trigger: {
-        hour: r.hour,
-        minute: r.minute,
-        repeats: true,
-      },
+      content: { title: r.title, body: "It's time!", sound: true },
+      trigger: { hour: r.hour, minute: r.minute, repeats: true },
     });
     ids.push(id);
   } else if (r.scheduleType === "once" && r.when) {
     const id = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: r.title,
-        body: "Reminder",
-        sound: true,
-        priority: Notifications.AndroidNotificationPriority.HIGH,
-      },
+      content: { title: r.title, body: "Reminder", sound: true },
       trigger: new Date(r.when),
     });
     ids.push(id);
   }
-
   return ids;
 }
 
 async function cancelReminder(ids?: string[]) {
   if (!ids?.length) return;
-  await Promise.all(
-    ids.map((id) => Notifications.cancelScheduledNotificationAsync(id).catch(() => {}))
-  );
+  await Promise.all(ids.map((id) => Notifications.cancelScheduledNotificationAsync(id).catch(() => {})));
 }
 
 const Reminders: React.FC = () => {
@@ -100,89 +78,51 @@ const Reminders: React.FC = () => {
   const [uid, setUid] = useState<string | null>(null);
   const [reminders, setReminders] = useState<Reminder[]>([]);
 
-  // Auth -> uid
+  useEffect(() => auth().onAuthStateChanged((u) => setUid(u?.uid ?? null)), []);
+
   useEffect(() => {
-    return auth().onAuthStateChanged((u) => setUid(u?.uid ?? null));
-  }, []);
-
-  // Live subscribe to reminders
-  useEffect(() => {
-  if (!uid) {
-    setReminders([]);
-    return;
-  }
-
-  const ref = firestore()
-    .collection("users")
-    .doc(uid)
-    .collection("reminders")
-    .orderBy("createdAt", "asc");
-
-  const unsubscribe = ref.onSnapshot(
-    (snap) => {
-      // ✅ guard against null/undefined snapshots
-      if (!snap) {
-        setReminders([]);
-        return;
-      }
-
-      if (snap.empty) {
-        setReminders([]);
-        return;
-      }
-
-      const list: Reminder[] = snap.docs.map((d) => {
-        const data = d.data() as any;
-
-        // createdAt can be missing until server timestamp resolves
-        const createdAt =
-          data?.createdAt?.toDate?.() ??
-          (typeof data?.createdAt === "number" ? new Date(data.createdAt) : null);
-
-        return {
-          id: d.id,
-          title: String(data?.title ?? "Reminder"),
-          rawTime: String(data?.rawTime ?? ""),
-          scheduleType:
-            data?.scheduleType === "once" ? "once" : "daily",
-          hour: typeof data?.hour === "number" ? data.hour : undefined,
-          minute: typeof data?.minute === "number" ? data.minute : undefined,
-          when: typeof data?.when === "number" ? data.when : undefined,
-          enabled: !!data?.enabled,
-          notificationIds: Array.isArray(data?.notificationIds)
-            ? data.notificationIds.filter((x: any) => typeof x === "string")
-            : [],
-          createdAt,
-        };
-      });
-
-      setReminders(list);
-    },
-    (err) => {
-      console.warn("Reminders onSnapshot error:", err);
-      setReminders([]); // avoid null access
+    if (!uid) {
+      setReminders([]);
+      return;
     }
-  );
-
-  return unsubscribe;
-}, [uid]);
-
+    const ref = firestore().collection("users").doc(uid).collection("reminders").orderBy("createdAt", "asc");
+    const unsub = ref.onSnapshot(
+      (snap) => {
+        if (!snap || snap.empty) return setReminders([]);
+        const list: Reminder[] = snap.docs.map((d) => {
+          const data = d.data() as any;
+          return {
+            id: d.id,
+            title: String(data?.title ?? "Reminder"),
+            rawTime: String(data?.rawTime ?? ""),
+            scheduleType: data?.scheduleType === "once" ? "once" : "daily",
+            hour: typeof data?.hour === "number" ? data.hour : undefined,
+            minute: typeof data?.minute === "number" ? data.minute : undefined,
+            when: typeof data?.when === "number" ? data.when : undefined,
+            enabled: !!data?.enabled,
+            notificationIds: Array.isArray(data?.notificationIds)
+              ? data.notificationIds.filter((x: any) => typeof x === "string")
+              : [],
+          };
+        });
+        setReminders(list);
+      },
+      (err) => {
+        console.warn("Reminders onSnapshot error:", err);
+        setReminders([]);
+      }
+    );
+    return unsub;
+  }, [uid]);
 
   const toggle = useCallback(
     async (r: Reminder) => {
       if (!uid) return;
-      const doc = firestore()
-        .collection("users")
-        .doc(uid)
-        .collection("reminders")
-        .doc(r.id);
-
+      const doc = firestore().collection("users").doc(uid).collection("reminders").doc(r.id);
       if (r.enabled) {
-        // disable
         await cancelReminder(r.notificationIds);
         await doc.update({ enabled: false, notificationIds: [] });
       } else {
-        // enable
         const newIds = await scheduleReminder(r);
         await doc.update({ enabled: true, notificationIds: newIds });
       }
@@ -200,12 +140,7 @@ const Reminders: React.FC = () => {
           style: "destructive",
           onPress: async () => {
             await cancelReminder(r.notificationIds);
-            await firestore()
-              .collection("users")
-              .doc(uid)
-              .collection("reminders")
-              .doc(r.id)
-              .delete();
+            await firestore().collection("users").doc(uid).collection("reminders").doc(r.id).delete();
           },
         },
       ]);
@@ -219,11 +154,15 @@ const Reminders: React.FC = () => {
 
       {reminders.map((r) => (
         <View key={r.id} style={s.card}>
+          {/* Fixed: Keep button inside card bounds */}
+          <TouchableOpacity onPress={() => remove(r)} style={s.removeBtn}>
+            <Text style={s.removeText}>Remove</Text>
+          </TouchableOpacity>
+
           <View style={s.cardHeader}>
-            <Text style={s.title}>{r.title}</Text>
-            <TouchableOpacity onPress={() => remove(r)} style={s.removeBtn}>
-              <Text style={s.removeText}>Remove</Text>
-            </TouchableOpacity>
+            <Text style={s.title} numberOfLines={3}>
+              {r.title}
+            </Text>
           </View>
 
           <View style={s.body}>
@@ -234,7 +173,7 @@ const Reminders: React.FC = () => {
             <Switch
               value={r.enabled}
               onValueChange={() => toggle(r)}
-              thumbColor={r.enabled ? "#fff" : "#fff"}
+              thumbColor="#fff"
               trackColor={{ false: theme.surfaceAccent, true: theme.secondary }}
             />
           </View>
@@ -242,9 +181,7 @@ const Reminders: React.FC = () => {
       ))}
 
       {reminders.length === 0 && (
-        <Text style={{ color: theme.secondaryAccent, marginTop: 12 }}>
-          No reminders yet. Add some from MindBot.
-        </Text>
+        <Text style={{ color: theme.secondaryAccent, marginTop: 12 }}>No reminders yet. Add some from MindBot.</Text>
       )}
     </ScrollView>
   );
@@ -262,27 +199,35 @@ const getStyles = (theme: any) =>
       marginTop: 8,
     },
     card: {
+      position: "relative",               // <-- allow absolute-positioned button inside
       backgroundColor: theme.primaryAccent,
       borderRadius: 16,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: theme.border,
       padding: 12,
       marginBottom: 12,
+      overflow: "hidden",
     },
     cardHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
+      // title only; button is absolute
+      paddingRight: 84,                   // <-- space reserved for the pill
       marginBottom: 8,
     },
     title: { color: theme.secondary, fontSize: 18, fontWeight: "700" },
+
+    // Fixed remove button
     removeBtn: {
+      position: "absolute",
+      right: 12,
+      top: 12,
       backgroundColor: "#e74c3c",
       paddingVertical: 6,
       paddingHorizontal: 10,
       borderRadius: 12,
+      zIndex: 1,
     },
     removeText: { color: "#fff", fontWeight: "700" },
+
     body: {
       flexDirection: "row",
       alignItems: "center",
