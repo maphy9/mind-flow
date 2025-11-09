@@ -45,9 +45,9 @@ export async function scheduleDailyNotification() {
       sound: true,
     },
     trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: 120,
-      repeat: true,
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: 12,
+      minute: 30,
     },
   });
 }

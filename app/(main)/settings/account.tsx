@@ -24,16 +24,23 @@ const AccountScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.card}>
-        <InfoRow
-          label="Display Name"
-          value={currentUser?.displayName || "Not set"}
-          theme={theme}
-        />
-        <InfoRow
-          label="Email"
-          value={currentUser?.email || "Not set"}
-          theme={theme}
-        />
+        <View
+          style={[
+            styles.infoRow,
+            { borderBottomWidth: 1, borderBottomColor: theme.surfaceAccent },
+          ]}
+        >
+          <Text style={styles.infoLabel}>Display Name</Text>
+          <Text style={styles.infoValue}>
+            {currentUser?.displayName || "Not set"}
+          </Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Email</Text>
+          <Text style={styles.infoValue}>
+            {currentUser?.email || "Not set"}
+          </Text>
+        </View>
       </View>
 
       <TouchableOpacity
@@ -69,8 +76,6 @@ const getStyles = (theme) =>
       alignItems: "center",
       paddingVertical: 18,
       paddingHorizontal: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.surfaceAccent,
     },
     infoLabel: {
       color: theme.secondaryAccent,
