@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
+  RefreshControl,
 } from "react-native";
-// FIX: Import modular auth functions
+import { useFocusEffect } from "@react-navigation/native";
 import { getAuth } from "@react-native-firebase/auth";
-// FIX: Import modular firestore functions
 import {
   getFirestore,
   collection,
@@ -19,8 +19,6 @@ import {
 import { BarChart } from "react-native-gifted-charts";
 import { useTheme } from "@/context/themeContext";
 
-// FIX: Initialize Firebase services outside the component
-// This follows the modular pattern and ensures they are singletons.
 const authInstance = getAuth();
 const db = getFirestore();
 
@@ -28,56 +26,65 @@ const Tables = () => {
   const { theme } = useTheme();
   const styles = getStyles(theme);
   const { width } = useWindowDimensions();
-  const [testResults, setTestResults] = useState<any[]>([]); // Changed to any[] to match 'results'
+  const [testResults, setTestResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchResults = async () => {
-      try {
-        // FIX: Use the initialized auth instance
-        const user = authInstance.currentUser;
-        if (!user) {
-          setError("User not authenticated.");
-          setLoading(false);
-          return;
-        }
-
-        const uid = user.uid;
-
-        // FIX: Rebuild the query using modular functions
-        // 1. Define the collection reference
-        const testResultsColRef = collection(db, "users", uid, "testResults");
-        // 2. Define the query
-        const q = query(testResultsColRef, orderBy("createdAt", "desc"));
-        // 3. Execute the query
-        const snapshot = await getDocs(q);
-
-        const results = snapshot.docs.map((doc) => {
-          const data = doc.data() as any;
-          const createdAt =
-            data.createdAt && data.createdAt.seconds
-              ? new Date(data.createdAt.seconds * 1000)
-              : null;
-
-          return {
-            id: doc.id,
-            overallRating: Number(data.overallRating ?? 0),
-            createdAt,
-          };
-        });
-
-        setTestResults(results);
+  const fetchResults = useCallback(async () => {
+    try {
+      const user = authInstance.currentUser;
+      if (!user) {
+        setError("User not authenticated.");
         setLoading(false);
-      } catch (err: any) {
-        console.error("Failed to fetch test results:", err);
-        setError(err.message || "Failed to fetch test results.");
-        setLoading(false);
+        return;
       }
-    };
 
+      const testResultsColRef = collection(
+        db,
+        "users",
+        user.uid,
+        "testResults"
+      );
+      const q = query(testResultsColRef, orderBy("createdAt", "desc"));
+      const snapshot = await getDocs(q);
+
+      const results = snapshot.docs.map((doc) => {
+        const data = doc.data() as any;
+        const createdAt =
+          data.createdAt && data.createdAt.seconds
+            ? new Date(data.createdAt.seconds * 1000)
+            : null;
+
+        return {
+          id: doc.id,
+          overallRating: Number(data.overallRating ?? 0),
+          createdAt,
+        };
+      });
+
+      setTestResults(results);
+      setError(null);
+    } catch (err: any) {
+      console.error("Failed to fetch test results:", err);
+      setError(err.message || "Failed to fetch test results.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      fetchResults();
+    }, [fetchResults])
+  );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
     fetchResults();
-  }, []); // We can keep the empty dependency array as authInstance and db are stable
+  }, [fetchResults]);
 
   const chartData = useMemo(() => {
     const sorted = [...testResults].sort((a, b) => {
@@ -128,8 +135,20 @@ const Tables = () => {
   const spacing = 12;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {loading && <Text style={styles.info}>Loading...</Text>}
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={theme.secondary}
+        />
+      }
+    >
+      {loading && testResults.length === 0 && (
+        <Text style={styles.info}>Loading...</Text>
+      )}
+
       {error && <Text style={[styles.info, styles.error]}>{error}</Text>}
 
       {!loading && !error && chartData.length === 0 && (
@@ -158,18 +177,18 @@ const Tables = () => {
             xAxisLabelTextStyle={{
               color: theme.secondary,
               fontSize: 12,
-              marginTop: 4,
+              marginTop: 6,
             }}
             rotateLabel
-            labelWidth={50}
+            labelWidth={40}
             noOfSections={maxVal / stepVal}
             maxValue={maxVal}
             stepValue={stepVal}
             rulesType="solid"
             rulesThickness={1}
-            rulesColor={theme.primaryAccent}
+            rulesColor={theme.secondaryAccent}
             yAxisLabelWidth={30}
-            frontColor={theme.surface}
+            frontColor="#3B82F6"
             showLine={false}
             showGradient={false}
             showYAxisIndices={false}

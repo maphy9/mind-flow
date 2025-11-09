@@ -38,7 +38,6 @@ export function LocationProvider({ children }) {
             lng: currentLocation.coords.longitude,
           });
         } catch (error) {
-          console.log("Location error:", error.message);
           setErrorMsg("Location unavailable");
           setLocation(DEFAULT_LOCATION);
         }
