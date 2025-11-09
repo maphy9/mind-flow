@@ -141,7 +141,7 @@ export default function TabLayout() {
         name="test"
         options={{
           href: null,
-          headerShown: false,
+          title: "Daily Wellness Test",
         }}
       />
       <Tabs.Screen
