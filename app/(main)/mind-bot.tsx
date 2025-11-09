@@ -1,5 +1,5 @@
 // app/(main)/mind-bot.tsx
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -16,15 +16,146 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/context/themeContext";
 import Text from "@/components/general/Text";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
+import * as Notifications from "expo-notifications"; // 👈 NEW
 
 type Role = "user" | "assistant" | "system";
 type Msg = { id: string; role: Role; content: string };
 
-const SYSTEM_PROMPT =
-  "You are MindBot, a warm, concise mental-wellness guide. Keep replies short and practical.";
+type Plan = {
+  message: string;
+  actions: { text: string; time: string }[];
+};
+
+const SYSTEM_PROMPT = `You are MindBot. Always reply with a single valid JSON object (no code fences, no extra text). Shape:
+{
+  "message": string,
+  "actions": [
+    { "text": string, "time": string }
+  ]
+}
+Rules:
+- Output ONLY the JSON object. No markdown, no prose.
+- Keep "message" warm, concise (1–3 sentences), and practical.
+- Suggest up to 5 actions with realistic reminder "time" values like "in 10 minutes", "today 18:00", or ISO8601.
+- Do not include any other fields.`;
 
 const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
 const DEEPSEEK_MODEL = "deepseek-chat";
+
+const storageKey = (uid?: string | null) => `@mindbot_conversation:${uid ?? "anon"}`;
+const sanitize = (arr: any[]): Msg[] =>
+  (arr || [])
+    .filter(
+      (m) =>
+        m &&
+        (m.role === "user" || m.role === "assistant") &&
+        typeof m.content === "string"
+    )
+    .map((m, idx) => ({
+      id: m.id ?? `${Date.now()}-${idx}`,
+      role: m.role,
+      content: m.content,
+    }));
+
+// ===== Helpers for reminders =====
+
+// Parse common time phrases into a schedule
+function parseTimeToReminder(raw: string) {
+  const t = raw.trim().toLowerCase();
+
+  // HH:mm (daily)
+  const m1 = t.match(/^(\d{1,2}):(\d{2})$/);
+  if (m1) {
+    const hour = Math.min(23, parseInt(m1[1], 10));
+    const minute = Math.min(59, parseInt(m1[2], 10));
+    return { scheduleType: "daily" as const, hour, minute };
+  }
+
+  // today HH:mm (once)
+  const m2 = t.match(/^today\s+(\d{1,2}):(\d{2})$/);
+  if (m2) {
+    const hour = Math.min(23, parseInt(m2[1], 10));
+    const minute = Math.min(59, parseInt(m2[2], 10));
+    const d = new Date();
+    d.setHours(hour, minute, 0, 0);
+    if (d.getTime() < Date.now()) d.setDate(d.getDate() + 1);
+    return { scheduleType: "once" as const, when: d.getTime() };
+  }
+
+  // in X minutes/hours (once)
+  const m3 = t.match(/^in\s+(\d+)\s+(minute|minutes|hour|hours)$/);
+  if (m3) {
+    const n = parseInt(m3[1], 10);
+    const ms = m3[2].startsWith("hour") ? n * 60 * 60 * 1000 : n * 60 * 1000;
+    return { scheduleType: "once" as const, when: Date.now() + ms };
+  }
+
+  // Fallback: any HH:mm inside -> daily
+  const m4 = t.match(/(\d{1,2}):(\d{2})/);
+  if (m4) {
+    const hour = Math.min(23, parseInt(m4[1], 10));
+    const minute = Math.min(59, parseInt(m4[2], 10));
+    return { scheduleType: "daily" as const, hour, minute };
+  }
+
+  // Unknown format -> undefined (we’ll still save raw text)
+  return null;
+}
+
+async function ensureNotifPerms(): Promise<boolean> {
+  const { status } = await Notifications.getPermissionsAsync();
+  if (status === "granted") return true;
+  const req = await Notifications.requestPermissionsAsync();
+  return req.status === "granted";
+}
+
+// Schedule local notifications and save a reminder doc in Firestore
+async function scheduleAndSaveReminder(
+  uid: string,
+  title: string,
+  rawTime: string
+) {
+  const parsed = parseTimeToReminder(rawTime);
+  const base: any = {
+    title,
+    rawTime,
+    scheduleType: parsed?.scheduleType ?? "daily",
+    hour: (parsed as any)?.hour ?? null,
+    minute: (parsed as any)?.minute ?? null,
+    when: (parsed as any)?.when ?? null,
+    enabled: true,
+    notificationIds: [],
+    createdAt: firestore.FieldValue.serverTimestamp(),
+  };
+
+  // Schedule local notification(s)
+  const ok = await ensureNotifPerms();
+  if (ok) {
+    if (base.scheduleType === "daily" && base.hour != null && base.minute != null) {
+      const id = await Notifications.scheduleNotificationAsync({
+        content: { title, body: "It's time!", sound: true },
+        trigger: { hour: base.hour, minute: base.minute, repeats: true },
+      });
+      base.notificationIds.push(id);
+    } else if (base.scheduleType === "once" && base.when) {
+      const id = await Notifications.scheduleNotificationAsync({
+        content: { title, body: "Reminder", sound: true },
+        trigger: new Date(base.when),
+      });
+      base.notificationIds.push(id);
+    }
+  }
+
+  // Save to Firestore
+  await firestore()
+    .collection("users")
+    .doc(uid)
+    .collection("reminders")
+    .add(base);
+}
 
 const MindBot: React.FC = () => {
   const { theme } = useTheme();
@@ -32,6 +163,8 @@ const MindBot: React.FC = () => {
   const insets = useSafeAreaInsets();
 
   const listRef = useRef<FlatList<Msg>>(null);
+  const [uid, setUid] = useState<string | null>(null);
+
   const [messages, setMessages] = useState<Msg[]>([
     { id: "sys", role: "system", content: SYSTEM_PROMPT },
     { id: "hello", role: "assistant", content: "Hi, how can I help you?" },
@@ -40,21 +173,102 @@ const MindBot: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [inputBarH, setInputBarH] = useState(56);
 
-  const visible = useMemo(
-    () => messages.filter((m) => m.role !== "system"),
-    [messages]
-  );
+  const [plan, setPlan] = useState<Plan | null>(null);
+  const [selected, setSelected] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    const unsub = auth().onAuthStateChanged((user) => setUid(user?.uid ?? null));
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const raw = await AsyncStorage.getItem(storageKey(uid));
+        const localMsgs = raw ? sanitize(JSON.parse(raw)) : [];
+        if (!cancelled && localMsgs.length) {
+          setMessages([{ id: "sys", role: "system", content: SYSTEM_PROMPT }, ...localMsgs]);
+        }
+        if (uid) {
+          const snap = await firestore()
+            .collection("users")
+            .doc(uid)
+            .collection("mindbotMessages")
+            .orderBy("createdAt", "asc")
+            .limit(300)
+            .get();
+          const cloudMsgs: Msg[] = snap.docs.map((d) => {
+            const data = d.data() as any;
+            return { id: d.id, role: data.role, content: data.content } as Msg;
+          });
+          if (!cancelled && cloudMsgs.length) {
+            setMessages([{ id: "sys", role: "system", content: SYSTEM_PROMPT }, ...sanitize(cloudMsgs)]);
+          }
+        }
+      } catch (e) {
+        console.warn("MindBot: load history failed:", e);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [uid]);
+
+  const visible = useMemo(() => messages.filter((m) => m.role !== "system"), [messages]);
+
+  useEffect(() => {
+    (async () => {
+      try { await AsyncStorage.setItem(storageKey(uid), JSON.stringify(visible)); }
+      catch (e) { console.warn("MindBot: save local failed:", e); }
+    })();
+  }, [visible, uid]);
+
+  const saveToCloud = useCallback(async (msg: Msg) => {
+    if (!uid) return;
+    try {
+      await firestore()
+        .collection("users")
+        .doc(uid)
+        .collection("mindbotMessages")
+        .add({
+          role: msg.role,
+          content: msg.content,
+          createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+    } catch (e) {
+      console.warn("MindBot: save cloud failed:", e);
+    }
+  }, [uid]);
 
   const scrollToEnd = useCallback(() => {
-    requestAnimationFrame(() =>
-      listRef.current?.scrollToEnd({ animated: true })
-    );
+    requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
   }, []);
 
   const onInputBarLayout = (e: LayoutChangeEvent) => {
     const h = Math.max(48, Math.round(e.nativeEvent.layout.height));
     if (h !== inputBarH) setInputBarH(h);
   };
+
+  function safeParsePlan(text: string): Plan | null {
+    try {
+      const match = text.match(/\{[\s\S]*\}$/);
+      const raw = match ? match[0] : text;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.message === "string" && Array.isArray(parsed.actions)) {
+        const actions = parsed.actions
+          .filter(
+            (a: any) =>
+              a && typeof a.text === "string" && a.text.trim() &&
+              typeof a.time === "string" && a.time.trim()
+          )
+          .slice(0, 5);
+        return { message: parsed.message, actions };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
 
   const onSend = useCallback(async () => {
     const text = input.trim();
@@ -65,56 +279,130 @@ const MindBot: React.FC = () => {
     setInput("");
     setSending(true);
     scrollToEnd();
+    saveToCloud(userMsg);
 
     try {
       const apiKey = process.env.EXPO_PUBLIC_DEEPSEEK_API_KEY;
       if (!apiKey) throw new Error("Missing EXPO_PUBLIC_DEEPSEEK_API_KEY");
 
-      const payloadMessages = messages.concat(userMsg).map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-
+      const history = messages.concat(userMsg).map((m) => ({ role: m.role, content: m.content }));
       const res = await fetch(DEEPSEEK_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: DEEPSEEK_MODEL,
-          messages: payloadMessages,
-          temperature: 0.4,
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: DEEPSEEK_MODEL, messages: history, temperature: 0.3 }),
       });
 
       const json = await res.json();
-      const reply =
-        json?.choices?.[0]?.message?.content?.trim() ??
-        "Sorry, I couldn’t generate a reply.";
+      const rawReply = json?.choices?.[0]?.message?.content ?? "Sorry, I couldn’t generate a reply.";
+      const maybePlan = safeParsePlan(rawReply);
 
-      setMessages((p) => [
-        ...p,
-        { id: `${Date.now()}-bot`, role: "assistant", content: reply },
-      ]);
+      if (maybePlan) {
+        setPlan(maybePlan);
+        setSelected({});
+        const botMsg: Msg = { id: `${Date.now()}-bot`, role: "assistant", content: maybePlan.message };
+        setMessages((p) => [...p, botMsg]);
+        saveToCloud(botMsg);
+      } else {
+        setPlan(null);
+        const botMsg: Msg = { id: `${Date.now()}-bot`, role: "assistant", content: rawReply };
+        setMessages((p) => [...p, botMsg]);
+        saveToCloud(botMsg);
+      }
+
       scrollToEnd();
     } catch {
-      setMessages((p) => [
-        ...p,
-        {
-          id: `${Date.now()}-err`,
-          role: "assistant",
-          content:
-            "Config/network issue. Check your DeepSeek key or connection and try again.",
-        },
-      ]);
+      const errMsg: Msg = {
+        id: `${Date.now()}-err`,
+        role: "assistant",
+        content: "Config/network issue. Check your DeepSeek key or connection and try again.",
+      };
+      setMessages((p) => [...p, errMsg]);
+      saveToCloud(errMsg);
     } finally {
       setSending(false);
     }
-  }, [input, sending, messages, scrollToEnd]);
+  }, [input, sending, messages, scrollToEnd, saveToCloud]);
 
-  // 🧮 Slightly smaller offset to remove the visual gap
+  const toggleAction = (idx: number) =>
+    setSelected((prev) => ({ ...prev, [idx]: !prev[idx] }));
+
+  // ✅ UPDATED: create reminders from chosen actions
+  const onAddSelected = async () => {
+    if (!plan) return;
+    const chosen = plan.actions.map((a, i) => ({ ...a, i })).filter((a) => selected[a.i]);
+    if (chosen.length === 0) return;
+
+    const user = auth().currentUser;
+    const currUid = user?.uid;
+    if (!currUid) {
+      const msg: Msg = { id: `${Date.now()}-err`, role: "assistant", content: "Please sign in to create reminders." };
+      setMessages((p) => [...p, msg]);
+      saveToCloud(msg);
+      return;
+    }
+
+    // Schedule + save each reminder
+    for (const act of chosen) {
+      await scheduleAndSaveReminder(currUid, act.text, act.time);
+    }
+
+    const confirm: Msg = {
+      id: `${Date.now()}-added`,
+      role: "assistant",
+      content: `Added ${chosen.length} reminder${chosen.length > 1 ? "s" : ""}.`,
+    };
+    setMessages((p) => [...p, confirm]);
+    saveToCloud(confirm);
+    setSelected({});
+    scrollToEnd();
+  };
+
   const keyboardOffset = Math.max(0, inputBarH + insets.bottom - 19);
+
+  const renderItem = ({ item }: { item: Msg }) => {
+    const isUser = item.role === "user";
+    return (
+      <View style={[s.bubble, isUser ? s.bubbleUser : s.bubbleBot]}>
+        <Text style={[s.text, isUser ? s.textUser : s.textBot]}>{item.content}</Text>
+      </View>
+    );
+  };
+
+  const PlanFooter = () =>
+    plan ? (
+      <View style={s.planCard}>
+        <Text style={s.planTitle}>Suggested actions</Text>
+        <View style={{ gap: 10 }}>
+          {plan.actions.map((a, i) => {
+            const checked = !!selected[i];
+            return (
+              <TouchableOpacity
+                key={`${i}-${a.text}`}
+                style={[s.planItem, checked && s.planItemSelected]}
+                onPress={() => toggleAction(i)}
+                activeOpacity={0.8}
+              >
+                <View style={s.checkbox}>
+                  <View style={[s.dot, checked && s.dotOn]} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.planText}>{a.text}</Text>
+                  <Text style={s.planSub}>{a.time}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {plan.actions.length > 0 && (
+          <TouchableOpacity style={s.cta} onPress={onAddSelected}>
+            <Text style={s.ctaText}>Add selected to reminders</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    ) : (
+      <View style={{ height: 4 }} />
+    );
 
   return (
     <KeyboardAvoidingView
@@ -126,24 +414,19 @@ const MindBot: React.FC = () => {
         <View style={s.inner}>
           <FlatList
             ref={listRef}
+            style={s.chatList}
             data={visible}
-            renderItem={({ item }) => {
-              const isUser = item.role === "user";
-              return (
-                <View style={[s.bubble, isUser ? s.bubbleUser : s.bubbleBot]}>
-                  <Text style={[s.text, isUser ? s.textUser : s.textBot]}>
-                    {item.content}
-                  </Text>
-                </View>
-              );
-            }}
+            renderItem={renderItem}
             keyExtractor={(m) => m.id}
-            contentContainerStyle={[
-              s.list,
-              { paddingBottom: inputBarH + insets.bottom },
-            ]}
+            ListFooterComponent={PlanFooter}
+            scrollEnabled
+            keyboardDismissMode="on-drag"
+            contentInsetAdjustmentBehavior="automatic"
+            contentContainerStyle={[s.list, { paddingBottom: inputBarH + insets.bottom }]}
+            scrollIndicatorInsets={{ bottom: inputBarH + insets.bottom }}
             onContentSizeChange={scrollToEnd}
             keyboardShouldPersistTaps="handled"
+            maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           />
 
           <View style={s.inputBar} onLayout={onInputBarLayout}>
@@ -166,11 +449,7 @@ const MindBot: React.FC = () => {
               disabled={sending}
               activeOpacity={0.8}
             >
-              {sending ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={s.send}>➤</Text>
-              )}
+              {sending ? <ActivityIndicator color="#fff" /> : <Text style={s.send}>➤</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -182,13 +461,9 @@ const MindBot: React.FC = () => {
 const getStyles = (theme: any) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.primary },
-    inner: { flex: 1, justifyContent: "space-between" },
-    list: {
-      paddingHorizontal: 16,
-      paddingTop: 12,
-      gap: 8,
-      backgroundColor: theme.primary,
-    },
+    inner: { flex: 1 },
+    chatList: { flex: 1 },
+    list: { paddingHorizontal: 16, paddingTop: 12, gap: 8, backgroundColor: theme.primary },
     bubble: {
       maxWidth: "88%",
       paddingVertical: 10,
@@ -211,6 +486,42 @@ const getStyles = (theme: any) =>
     text: { fontSize: 15, lineHeight: 20 },
     textUser: { color: theme.secondary },
     textBot: { color: theme.secondary, opacity: 0.95 },
+    planCard: {
+      marginHorizontal: 0,
+      marginTop: 4,
+      marginBottom: 8,
+      padding: 14,
+      borderRadius: 16,
+      backgroundColor: theme.primaryAccent,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.border,
+      gap: 12,
+    },
+    planTitle: { color: theme.secondary, fontSize: 16, fontWeight: "600" },
+    planItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      padding: 10,
+      borderRadius: 12,
+      backgroundColor: theme.primary,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.border,
+    },
+    planItemSelected: { backgroundColor: theme.surfaceAccent },
+    checkbox: {
+      width: 20,
+      height: 20,
+      borderRadius: 6,
+      borderWidth: 2,
+      borderColor: theme.secondary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "transparent" },
+    dotOn: { backgroundColor: theme.secondary },
+    planText: { color: theme.secondary, fontSize: 15, fontWeight: "600" },
+    planSub: { color: theme.secondaryAccent, fontSize: 12, marginTop: 2 },
     inputBar: {
       flexDirection: "row",
       alignItems: "flex-end",
