@@ -1,0 +1,14 @@
+{
+    // Use this file to configure debugging for React Native projects.
+    // Requires the "React Native Tools" extension (msjsdiag.vscode-react-native).
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Android - Experimental",
+            "request": "launch",
+            "type": "reactnative",
+            "cwd": "${workspaceFolder}",
+            "platform": "android"
+        }
+    ]
+}
