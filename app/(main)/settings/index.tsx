@@ -5,6 +5,7 @@ import {
   Image,
   Linking,
   AppState,
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import { useTheme } from "@/context/themeContext";
@@ -277,7 +278,7 @@ const Settings = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.sectionTitle}>Account</Text>
 
       <TouchableOpacity
@@ -523,7 +524,7 @@ const Settings = () => {
           </TouchableOpacity>
         </TouchableOpacity>
       )}
-    </View>
+    </ScrollView>
   );
 };
 

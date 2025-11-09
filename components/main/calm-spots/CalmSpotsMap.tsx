@@ -49,7 +49,7 @@ const CalmSpotsMap = () => {
       <View style={styles.mapContainer}>
         <LeafletView
           mapCenterPosition={centerPosition}
-          zoom={13}
+          zoom={16}
           doDebug={false}
           onMessageReceived={() => {}}
           onError={() => {
