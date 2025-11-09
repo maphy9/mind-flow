@@ -1,11 +1,11 @@
 export const COLORS = {
   dark: {
-    primary: "#444136",
-    primaryAccent: "#232C26",
+    primary: "#1A1D1A",
+    primaryAccent: "#2A2F2A",
     secondary: "#F5F5F4",
-    secondaryAccent: "#B7B0AA",
-    surface: "#4F876D",
-    surfaceAccent: "#2B5743",
+    secondaryAccent: "#8A8F8A",
+    surface: "#3A7556",
+    surfaceAccent: "#2D5C45",
     red: "#954247",
   },
   light: {
