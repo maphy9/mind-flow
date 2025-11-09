@@ -21,7 +21,6 @@ export const CalmSpotsProvider = ({ children }) => {
 
   const getNearbyCalmSpots = async (location, distance = DEFAULT_DISTANCE) => {
     const { lat: dLat, lng: dLng } = kilometersToGCS(distance);
-
     const calmSpotsRef = await collection(getFirestore(), "calm-spots");
 
     const q = query(

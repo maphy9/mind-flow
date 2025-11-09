@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { LeafletView } from "react-native-leaflet-view";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useLocation } from "@/context/locationContext";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCalmSpots } from "@/context/calmSpotsContext";
 import { useDispatch } from "react-redux";
 import { showAlert } from "@/redux/states/alerts";
@@ -20,11 +20,15 @@ const CalmSpotsMap = () => {
     selectRandomCalmSpot,
     getNearbyCalmSpots,
   } = useCalmSpots();
-  const [centerPosition, setCenterPosition] = useState(DEFAULT_LOCATION);
+  const hasFoundLocation = useRef(false);
+  const [centerPosition, setCenterPosition] = useState(location);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    getNearbyCalmSpots(DEFAULT_LOCATION);
+    getNearbyCalmSpots(location);
+    if (!hasFoundLocation.current) {
+      setCenterPosition(location);
+    }
   }, [location]);
 
   useEffect(() => {

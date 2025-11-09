@@ -2,7 +2,7 @@ import { useTheme } from "@/context/themeContext";
 import React from "react";
 import { Image, ImageBackground, StyleSheet, View } from "react-native";
 import Text from "../general/Text";
-import logo from "@/assets/images/vector-logo.png";
+import logo from "@/assets/images/logo.png";
 import logoBoxDark from "@/assets/images/logo-box-dark.png";
 import logoBoxLight from "@/assets/images/logo-box-light.png";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,8 +26,7 @@ const Header = () => {
       alignItems: "center",
     },
     logo: {
-      tintColor: theme.surface,
-      width: 100,
+      width: 79,
       height: 100,
     },
   });

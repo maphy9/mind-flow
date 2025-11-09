@@ -1,10 +1,8 @@
 import { showAlert } from "@/redux/states/alerts";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  requestForegroundPermissionsAsync,
-  getCurrentPositionAsync,
-} from "expo-location";
+import * as Location from "expo-location";
+import { DEFAULT_LOCATION } from "@/constants/location";
 
 export const LocationContext = createContext(null);
 
@@ -13,33 +11,44 @@ export function useLocation() {
 }
 
 export function LocationProvider({ children }) {
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState(DEFAULT_LOCATION);
+  const [errorMsg, setErrorMsg] = useState(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    async function getCurrentLocation() {
-      const { status } = await requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        dispatch(
-          showAlert({
-            text: "Unfortunately, we couldn't access your location",
-            type: "error",
-          })
-        );
-        return;
-      }
-      const location = await getCurrentPositionAsync({});
-      setLocation({
-        lat: location.coords.latitude,
-        lng: location.coords.longitude,
-      });
-    }
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
 
-    getCurrentLocation();
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          dispatch(
+            showAlert({
+              text: "Location permission denied. Using default location.",
+              type: "info",
+            })
+          );
+          return;
+        }
+
+        try {
+          const currentLocation = await Location.getCurrentPositionAsync({});
+          setLocation({
+            lat: currentLocation.coords.latitude,
+            lng: currentLocation.coords.longitude,
+          });
+        } catch (error) {
+          console.log("Location error:", error.message);
+          setErrorMsg("Location unavailable");
+          setLocation(DEFAULT_LOCATION);
+        }
+      } catch {}
+    })();
   }, []);
 
   const value = {
     location,
+    errorMsg,
   };
 
   return (

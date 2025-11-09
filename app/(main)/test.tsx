@@ -6,15 +6,27 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useTheme } from "@/context/themeContext";
 import { useRouter } from "expo-router";
 import { Card } from "react-native-paper";
 import testData from "@/assets/tests/tests.json";
 
-// ДОДАНО: імпорти Firebase Auth/Firestore
-import auth from "@react-native-firebase/auth";
-import firestore from "@react-native-firebase/firestore";
+// FIX: Import modular auth and firestore functions
+import { getAuth } from "@react-native-firebase/auth";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "@react-native-firebase/firestore";
+
+// FIX: Initialize Firebase services outside the component
+const authInstance = getAuth();
+const db = getFirestore();
 
 const TestScreen = () => {
   const router = useRouter();
@@ -22,27 +34,27 @@ const TestScreen = () => {
   const styles = getStyles(theme);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleAnswer = (questionId: string, value: number) => {
+    if (isLoading) return;
+
     const newAnswers = { ...answers, [questionId]: value };
     setAnswers(newAnswers);
 
     if (currentQuestionIndex < testData.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // Коли тест завершено — рахуємо і зберігаємо результати
-      // Виклик асинхронної функції без очікування (дозволяє не міняти сигнатуру)
+      setIsLoading(true);
       void calculateAndSaveResults(newAnswers);
     }
   };
 
-  // ЗМІНА: робимо асинхронною та додаємо запис у Firestore
   const calculateAndSaveResults = async (
     finalAnswers: Record<string, number>
   ) => {
+    // ... (Calculation logic remains the same)
     const { depression, loneliness, burnout } = testData.scoring;
-
-    // 1. Raw scores
     const depScore = depression.items.reduce(
       (acc, id) => acc + (finalAnswers[id] || 0),
       0
@@ -56,61 +68,49 @@ const TestScreen = () => {
       0
     );
     const boScore = boTotal / burnout.items.length;
-
-    // 2. Normalization (0-1, higher is better)
     const depNorm = 1 - depScore / 27;
     const lonNorm = 1 - lonScore / 6;
     const boNorm = 1 - boScore / 100;
-
-    // 3. Weighted average
     const overallRating = (depNorm * 0.4 + lonNorm * 0.3 + boNorm * 0.3) * 100;
     const overallRatingRounded = Math.round(overallRating);
 
-    // 4. ЗАПИС У FIRESTORE під поточним користувачем
     try {
-      const user = auth().currentUser;
+      // FIX: Use the initialized auth instance
+      const user = authInstance.currentUser;
       if (!user) {
-        // Якщо користувач не автентифікований — не пишемо під анонімом,
-        // а кидаємо чітку помилку (можете замінити на signInAnonymously(), якщо хочете).
         throw new Error(
           "User is not authenticated. Please sign in to save results."
         );
       }
-
       const uid = user.uid;
 
-      // Опційно: оновимо профіль користувача часовою міткою (merge, щоб не перетерти інші поля)
-      await firestore()
-        .collection("users")
-        .doc(uid)
-        .set(
-          { lastUpdatedAt: firestore.FieldValue.serverTimestamp() },
-          { merge: true }
-        );
+      // FIX: Use modular firestore functions (doc, setDoc, serverTimestamp)
+      const userDocRef = doc(db, "users", uid);
+      await setDoc(
+        userDocRef,
+        { lastUpdatedAt: serverTimestamp() },
+        { merge: true }
+      );
 
-      // Основний запис результату у підколекцію testResults
-      await firestore()
-        .collection("users")
-        .doc(uid)
-        .collection("testResults")
-        .add({
-          overallRating: overallRatingRounded, // зберігаємо інт
-          overallRatingRaw: overallRating, // і сире значення (з плаваючою)
-          createdAt: firestore.FieldValue.serverTimestamp(), // серверний час/дата
-        });
+      // FIX: Use modular firestore functions (collection, addDoc, serverTimestamp)
+      const testResultsColRef = collection(db, "users", uid, "testResults");
+      await addDoc(testResultsColRef, {
+        overallRating: overallRatingRounded,
+        overallRatingRaw: overallRating,
+        createdAt: serverTimestamp(),
+      });
     } catch (e) {
       console.error("Failed to save overallRating:", e);
       Alert.alert(
         "Saving error",
         e instanceof Error ? e.message : "Failed to save the test result."
       );
-      // Продовжуємо навігацію навіть якщо запис не вдався — за бажанням можна змінити
+      setIsLoading(false);
     }
 
-    // 5. Навігація назад на home з новим score
     router.replace({
       pathname: "/(main)/home",
-      params: { newChillScore: String(overallRatingRounded) }, // ціле число
+      params: { newChillScore: String(overallRatingRounded) },
     });
   };
 
@@ -128,21 +128,26 @@ const TestScreen = () => {
       </Card>
 
       <View style={styles.optionsContainer}>
-        {currentQuestion.options.map((option, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.optionButton}
-            onPress={() => handleAnswer(currentQuestion.id, option.value)}
-          >
-            <Text style={styles.optionText}>{option.label}</Text>
-          </TouchableOpacity>
-        ))}
+        {isLoading ? (
+          <ActivityIndicator size="large" color={theme.secondary} />
+        ) : (
+          currentQuestion.options.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.optionButton}
+              onPress={() => handleAnswer(currentQuestion.id, option.value)}
+            >
+              <Text style={styles.optionText}>{option.label}</Text>
+            </TouchableOpacity>
+          ))
+        )}
       </View>
     </ScrollView>
   );
 };
 
-const getStyles = (theme) =>
+// ... (getStyles remains the same)
+const getStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flexGrow: 1,
@@ -169,6 +174,8 @@ const getStyles = (theme) =>
     },
     optionsContainer: {
       marginTop: 16,
+      justifyContent: "center",
+      minHeight: 100, // Give space for the spinner
     },
     optionButton: {
       backgroundColor: theme.primary,
