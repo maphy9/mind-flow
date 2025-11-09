@@ -1,11 +1,10 @@
-// app/(main)/reminders.tsx
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   View,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Switch,
+  Switch, // Kept for reference, but we are replacing it
   Alert,
 } from "react-native";
 import Text from "@/components/general/Text";
@@ -27,8 +26,13 @@ type Reminder = {
   createdAt?: any;
 };
 
+// --- No changes to helper functions ---
 const describe = (r: Reminder) => {
-  if (r.scheduleType === "daily" && r.hour !== undefined && r.minute !== undefined) {
+  if (
+    r.scheduleType === "daily" &&
+    r.hour !== undefined &&
+    r.minute !== undefined
+  ) {
     const hh = String(r.hour).padStart(2, "0");
     const mm = String(r.minute).padStart(2, "0");
     return `Daily at ${hh}:${mm}`;
@@ -68,8 +72,13 @@ async function scheduleReminder(r: Reminder): Promise<string[]> {
 
 async function cancelReminder(ids?: string[]) {
   if (!ids?.length) return;
-  await Promise.all(ids.map((id) => Notifications.cancelScheduledNotificationAsync(id).catch(() => {})));
+  await Promise.all(
+    ids.map((id) =>
+      Notifications.cancelScheduledNotificationAsync(id).catch(() => {})
+    )
+  );
 }
+// --- End of helper functions ---
 
 const Reminders: React.FC = () => {
   const { theme } = useTheme();
@@ -78,6 +87,7 @@ const Reminders: React.FC = () => {
   const [uid, setUid] = useState<string | null>(null);
   const [reminders, setReminders] = useState<Reminder[]>([]);
 
+  // --- No changes to logic hooks (useEffect, useCallback) ---
   useEffect(() => auth().onAuthStateChanged((u) => setUid(u?.uid ?? null)), []);
 
   useEffect(() => {
@@ -85,7 +95,11 @@ const Reminders: React.FC = () => {
       setReminders([]);
       return;
     }
-    const ref = firestore().collection("users").doc(uid).collection("reminders").orderBy("createdAt", "asc");
+    const ref = firestore()
+      .collection("users")
+      .doc(uid)
+      .collection("reminders")
+      .orderBy("createdAt", "asc");
     const unsub = ref.onSnapshot(
       (snap) => {
         if (!snap || snap.empty) return setReminders([]);
@@ -118,7 +132,11 @@ const Reminders: React.FC = () => {
   const toggle = useCallback(
     async (r: Reminder) => {
       if (!uid) return;
-      const doc = firestore().collection("users").doc(uid).collection("reminders").doc(r.id);
+      const doc = firestore()
+        .collection("users")
+        .doc(uid)
+        .collection("reminders")
+        .doc(r.id);
       if (r.enabled) {
         await cancelReminder(r.notificationIds);
         await doc.update({ enabled: false, notificationIds: [] });
@@ -140,18 +158,22 @@ const Reminders: React.FC = () => {
           style: "destructive",
           onPress: async () => {
             await cancelReminder(r.notificationIds);
-            await firestore().collection("users").doc(uid).collection("reminders").doc(r.id).delete();
+            await firestore()
+              .collection("users")
+              .doc(uid)
+              .collection("reminders")
+              .doc(r.id)
+              .delete();
           },
         },
       ]);
     },
     [uid]
   );
+  // --- End of logic hooks ---
 
   return (
     <ScrollView style={s.container} contentContainerStyle={{ padding: 16 }}>
-      <Text style={s.header}>Reminders</Text>
-
       {reminders.map((r) => (
         <View key={r.id} style={s.card}>
           {/* Fixed: Keep button inside card bounds */}
@@ -167,21 +189,25 @@ const Reminders: React.FC = () => {
 
           <View style={s.body}>
             <View style={{ flex: 1 }}>
-              <Text style={s.label}>Reminder</Text>
-              <Text style={s.sub}>{describe(r)}</Text>
+              <Text style={s.sub}>{describe(r)} </Text>
             </View>
-            <Switch
-              value={r.enabled}
-              onValueChange={() => toggle(r)}
-              thumbColor="#fff"
-              trackColor={{ false: theme.surfaceAccent, true: theme.secondary }}
-            />
+
+            {/* Custom Toggle (Switch replacement) */}
+            <TouchableOpacity activeOpacity={0.7} onPress={() => toggle(r)}>
+              <View style={[s.toggle, r.enabled && s.toggleActive]}>
+                <View
+                  style={[s.toggleCircle, r.enabled && s.toggleCircleActive]}
+                />
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
       ))}
 
       {reminders.length === 0 && (
-        <Text style={{ color: theme.secondaryAccent, marginTop: 12 }}>No reminders yet. Add some from MindBot.</Text>
+        <Text style={{ color: theme.secondaryAccent, marginTop: 12 }}>
+          No reminders yet. Add some from MindBot.
+        </Text>
       )}
     </ScrollView>
   );
@@ -189,6 +215,7 @@ const Reminders: React.FC = () => {
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
+    // --- Original styles ---
     container: { flex: 1, backgroundColor: theme.primary },
     header: {
       color: theme.secondary,
@@ -199,7 +226,7 @@ const getStyles = (theme: any) =>
       marginTop: 8,
     },
     card: {
-      position: "relative",               // <-- allow absolute-positioned button inside
+      position: "relative",
       backgroundColor: theme.primaryAccent,
       borderRadius: 16,
       borderWidth: StyleSheet.hairlineWidth,
@@ -207,36 +234,64 @@ const getStyles = (theme: any) =>
       padding: 12,
       marginBottom: 12,
       overflow: "hidden",
+      elevation: 2,
     },
     cardHeader: {
-      // title only; button is absolute
-      paddingRight: 84,                   // <-- space reserved for the pill
+      paddingRight: 84,
       marginBottom: 8,
     },
     title: { color: theme.secondary, fontSize: 18, fontWeight: "700" },
-
-    // Fixed remove button
     removeBtn: {
       position: "absolute",
       right: 12,
       top: 12,
-      backgroundColor: "#e74c3c",
+      // Hardcoded color replaced with theme.red
+      backgroundColor: theme.red, // Changed from "#e74c3c"
       paddingVertical: 6,
       paddingHorizontal: 10,
       borderRadius: 12,
       zIndex: 1,
     },
     removeText: { color: "#fff", fontWeight: "700" },
-
     body: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.surface,
+      backgroundColor: theme.primaryAccent,
       borderRadius: 12,
       padding: 12,
     },
     label: { color: theme.secondary, fontSize: 14, fontWeight: "700" },
-    sub: { color: theme.secondaryAccent, marginTop: 2 },
+    // Readability improvements for 'sub' text
+    sub: {
+      color: theme.secondary,
+      marginTop: 4, // Changed from 2
+      fontSize: 15, // Changed from 14
+    },
+
+    // --- Styles for the custom toggle, using theme colors ---
+    toggle: {
+      width: 51,
+      height: 31,
+      borderRadius: 16,
+      // Background color when OFF (gray track)
+      backgroundColor: theme.surfaceAccent, // Changed from hardcoded
+      justifyContent: "center",
+      padding: 2,
+    },
+    toggleActive: {
+      // Background color when ON (green track)
+      backgroundColor: theme.surface, // Changed from hardcoded
+    },
+    toggleCircle: {
+      width: 27,
+      height: 27,
+      borderRadius: 14,
+      // Thumb color (white)
+      backgroundColor: theme.secondary, // Changed from "#fff" to theme.secondary (white in dark mode, dark in light mode)
+    },
+    toggleCircleActive: {
+      alignSelf: "flex-end",
+    },
   });
 
 export default Reminders;
