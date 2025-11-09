@@ -4,22 +4,21 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  Platform,
   useWindowDimensions,
 } from "react-native";
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 import { BarChart } from "react-native-gifted-charts";
+import { useTheme } from "@/context/themeContext";
 
 const Tables = () => {
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   const { width } = useWindowDimensions();
-  const [testResults, setTestResults] = useState<
-    { id: string; overallRating: number; createdAt: Date | null }[]
-  >([]);
+  const [testResults, setTestResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. забираем данные из Firestore
   useEffect(() => {
     const fetchResults = async () => {
       try {
@@ -65,9 +64,7 @@ const Tables = () => {
     fetchResults();
   }, []);
 
-  // 2. превращаем в данные для графика
   const chartData = useMemo(() => {
-    // хотим слева-направо по времени → сортируем по возрастанию
     const sorted = [...testResults].sort((a, b) => {
       const ta = a.createdAt ? a.createdAt.getTime() : 0;
       const tb = b.createdAt ? b.createdAt.getTime() : 0;
@@ -75,7 +72,6 @@ const Tables = () => {
     });
 
     return sorted.map((item) => {
-      // подпись вида "03.11" или "03.11 16:37" если нужно
       const label = item.createdAt
         ? item.createdAt.toLocaleDateString("en-GB", {
             day: "2-digit",
@@ -86,24 +82,16 @@ const Tables = () => {
       return {
         label,
         value: item.overallRating,
-        frontColor: "#3B82F6",
+        frontColor: theme.surface,
         topLabelComponent: () => (
-          <Text
-            style={{
-              fontSize: 11,
-              fontWeight: "600",
-              color: "#0F172A",
-              marginBottom: 4,
-            }}
-          >
+          <Text style={[styles.topLabel, { color: theme.secondary }]}>
             {item.overallRating}
           </Text>
         ),
       };
     });
-  }, [testResults]);
+  }, [testResults, theme]);
 
-  // 3. считаем maxValue и шаги
   const maxVal = useMemo(() => {
     if (chartData.length === 0) return 10;
     const m = Math.max(...chartData.map((d) => d.value));
@@ -126,7 +114,6 @@ const Tables = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-
       {loading && <Text style={styles.info}>Loading...</Text>}
       {error && <Text style={[styles.info, styles.error]}>{error}</Text>}
 
@@ -135,28 +122,8 @@ const Tables = () => {
       )}
 
       {!loading && !error && chartData.length > 0 && (
-        <View
-          style={{
-            backgroundColor: "#F8FAFC",
-            borderRadius: 16,
-            paddingVertical: 16,
-            paddingHorizontal: 12,
-            borderWidth: 1,
-            borderColor: "#E2E8F0",
-            marginTop: 16,
-            overflow: "hidden",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "700",
-              color: "#0F172A",
-              marginBottom: 8,
-            }}
-          >
-            Test History
-          </Text>
+        <View style={styles.chartContainer}>
+          <Text style={styles.title}>Test History</Text>
 
           <BarChart
             data={chartData}
@@ -170,34 +137,32 @@ const Tables = () => {
             animationDuration={900}
             yAxisThickness={1}
             xAxisThickness={1}
-            yAxisColor="#CBD5E1"
-            xAxisColor="#CBD5E1"
-            yAxisTextStyle={{ color: "#64748B", fontSize: 12 }}
+            yAxisColor={theme.secondary}
+            xAxisColor={theme.secondary}
+            yAxisTextStyle={{ color: theme.secondary, fontSize: 12 }}
             xAxisLabelTextStyle={{
-              color: "#475569",
+              color: theme.secondary,
               fontSize: 12,
-              marginTop: 6,
+              marginTop: 4,
             }}
             rotateLabel
-            labelWidth={40}
+            labelWidth={50}
             noOfSections={maxVal / stepVal}
             maxValue={maxVal}
             stepValue={stepVal}
             rulesType="solid"
             rulesThickness={1}
-            rulesColor="#E2E8F0"
+            rulesColor={theme.primaryAccent}
             yAxisLabelWidth={30}
-            frontColor="#3B82F6"
+            frontColor={theme.surface}
             showLine={false}
             showGradient={false}
             showYAxisIndices={false}
             showFractionalValues={false}
-            showValuesAsTopLabel
           />
         </View>
       )}
 
-      {/* Можешь оставить и сырой список ниже — для дебага */}
       {!loading && !error && testResults.length > 0 && (
         <View style={{ marginTop: 18 }}>
           <Text style={styles.subtitle}>Raw list</Text>
@@ -223,53 +188,72 @@ const Tables = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 16,
-    backgroundColor: "#F9FAFB",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  info: {
-    fontSize: 16,
-    color: "#6B7280",
-    marginTop: 8,
-  },
-  error: {
-    color: "#DC2626",
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#111827",
-  },
-  item: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  date: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#374151",
-  },
-  score: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#0B0F0A",
-    marginTop: 4,
-  },
-});
+const getStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      padding: 16,
+      backgroundColor: theme.primary,
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: theme.secondary,
+      marginBottom: 8,
+    },
+    info: {
+      fontSize: 16,
+      color: theme.secondaryAccent,
+      marginTop: 8,
+    },
+    error: {
+      color: theme.red,
+    },
+    subtitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      marginBottom: 8,
+      color: theme.secondary,
+    },
+    item: {
+      backgroundColor: theme.primaryAccent,
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 10,
+      elevation: 2,
+      shadowColor: "#000",
+      shadowOpacity: 0.05,
+      shadowRadius: 3,
+      shadowOffset: { width: 0, height: 2 },
+    },
+    date: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: theme.secondary,
+    },
+    score: {
+      fontSize: 17,
+      fontWeight: "700",
+      color: theme.secondary,
+      marginTop: 4,
+    },
+    chartContainer: {
+      backgroundColor: theme.primaryAccent,
+      borderRadius: 16,
+      paddingTop: 12,
+      paddingBottom: 40,
+      paddingHorizontal: 12,
+      borderWidth: 1,
+      borderColor: theme.secondaryAccent,
+      marginTop: 16,
+      overflow: "hidden",
+    },
+    topLabel: {
+      fontSize: 11,
+      fontWeight: "600",
+      color: theme.secondary,
+      marginBottom: 4,
+    },
+  });
 
 export default Tables;
