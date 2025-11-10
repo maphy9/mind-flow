@@ -71,10 +71,11 @@ eas build -p android --profile preview
 
 ---
 
-## 📱 Screens (example)
+## 📱 Screenshots
 | MindBot | Reminders | Chill Index |
 |----------|------------|-------------|
-| 🤖 AI Chat | 🔔 Reminder list | 📊 Progress tracking |
+| <img width="576" height="1280" alt="image" src="https://github.com/user-attachments/assets/7602853f-4c46-4e89-af30-4738bb17737c" />| <img width="576" height="1280" alt="image" src="https://github.com/user-attachments/assets/316e67c7-13c9-4a24-b31c-c01a438299fa" />| <img width="576" height="1280" alt="image" src="https://github.com/user-attachments/assets/dc363a55-5066-4692-ac9d-118684822f41" />|
+|<img width="576" height="1280" alt="image" src="https://github.com/user-attachments/assets/29a5b0dd-1317-4872-8eba-f39e3f664835" />|<img width="576" height="1280" alt="image" src="https://github.com/user-attachments/assets/f0f915ac-fd2b-4836-94e9-90aa196e7035" />|<img width="576" height="1280" alt="image" src="https://github.com/user-attachments/assets/77993bc4-4ad9-45b0-bed6-d2751c05bce7" />|
 
 ---
 
