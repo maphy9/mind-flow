@@ -21,17 +21,17 @@ Using AI-driven recommendations, the app learns your preferences and develops a 
 
 ## 🌿 Key Features
 
-## 🧘 MindBot (AI Chat) – interact with the AI and receive personalized activity suggestions.
+- 🧘 MindBot (AI Chat) – interact with the AI and receive personalized activity suggestions.
 
-## 🗺️ Relaxation Map – discover calm, nature-friendly spots in your city.
+- 🗺️ Relaxation Map – discover calm, nature-friendly spots in your city.
 
-## 📈 Chill Index – a well-being indicator based on your lifestyle and activities.
+- 📈 Chill Index – a well-being indicator based on your lifestyle and activities.
 
-## 🔔 Reminders System – supports consistency and emotional awareness.
+- 🔔 Reminders System – supports consistency and emotional awareness.
 
-## 🪞 Statistics & Progress – track your improvement over time.
+- 🪞 Statistics & Progress – track your improvement over time.
 
-## ⚙️ Tech Stack
+- ⚙️ Tech Stack
 
 Frontend (Mobile): React Native + Expo
 
@@ -44,6 +44,9 @@ Notifications: Expo Notifications
 Authentication: Firebase Auth
 
 Local Storage: AsyncStorage
-
 🚀 Getting Started
 1. Clone the repository
+   ```bash
+   git clone https://github.com/<your-username>/mindflow.git
+  cd mindflow
+  ```
